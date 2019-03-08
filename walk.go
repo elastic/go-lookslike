@@ -19,14 +19,12 @@ package lookslike
 
 import (
 	"reflect"
-
-	"github.com/elastic/beats/libbeat/common"
 )
 
 type walkObserverInfo struct {
 	key     pathComponent
 	value   interface{}
-	rootMap common.MapStr
+	rootMap Map
 	path    Path
 }
 
@@ -34,11 +32,11 @@ type walkObserverInfo struct {
 type walkObserver func(info walkObserverInfo) error
 
 // walk is a shorthand way to walk a tree.
-func walk(m common.MapStr, expandPaths bool, wo walkObserver) error {
+func walk(m Map, expandPaths bool, wo walkObserver) error {
 	return walkFullMap(m, m, Path{}, expandPaths, wo)
 }
 
-func walkFull(o interface{}, root common.MapStr, path Path, expandPaths bool, wo walkObserver) (err error) {
+func walkFull(o interface{}, root Map, path Path, expandPaths bool, wo walkObserver) (err error) {
 	lastPathComponent := path.Last()
 	if lastPathComponent == nil {
 		panic("Attempted to traverse an empty Path in lookslike.walkFull, this should never happen.")
@@ -72,7 +70,7 @@ func walkFull(o interface{}, root common.MapStr, path Path, expandPaths bool, wo
 }
 
 // walkFullMap walks the given MapStr tree.
-func walkFullMap(m common.MapStr, root common.MapStr, p Path, expandPaths bool, wo walkObserver) (err error) {
+func walkFullMap(m Map, root Map, p Path, expandPaths bool, wo walkObserver) (err error) {
 	for k, v := range m {
 		var newPath Path
 		if !expandPaths {

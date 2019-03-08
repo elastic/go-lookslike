@@ -18,7 +18,6 @@
 package lookslike
 
 import (
-	"github.com/elastic/beats/libbeat/common"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"regexp"
@@ -60,8 +59,8 @@ func TestIsArrayOf(t *testing.T) {
 
 	id := IsArrayOf(validator)
 
-	goodMap := common.MapStr{"foo": "bar"}
-	goodMapArr := []common.MapStr{goodMap, goodMap}
+	goodMap := Map{"foo": "bar"}
+	goodMapArr := []Map{goodMap, goodMap}
 
 	goodRes := assertIsDefValid(t, id, goodMapArr)
 	goodFields := goodRes.Fields
@@ -69,8 +68,8 @@ func TestIsArrayOf(t *testing.T) {
 	assert.Contains(t, goodFields, "p.[0].foo")
 	assert.Contains(t, goodFields, "p.[1].foo")
 
-	badMap := common.MapStr{"foo": "bot"}
-	badMapArr := []common.MapStr{badMap}
+	badMap := Map{"foo": "bot"}
+	badMapArr := []Map{badMap}
 
 	badRes := assertIsDefInvalid(t, id, badMapArr)
 	badFields := badRes.Fields
@@ -157,7 +156,7 @@ func TestIsUnique(t *testing.T) {
 	tests := []struct {
 		name      string
 		validator func() Validator
-		data      common.MapStr
+		data      Map
 		isValid   bool
 	}{
 		{
@@ -166,13 +165,13 @@ func TestIsUnique(t *testing.T) {
 				v := IsUnique()
 				return MustCompile(Map{"a": v, "b": v})
 			},
-			common.MapStr{"a": 1, "b": 1},
+			Map{"a": 1, "b": 1},
 			false,
 		},
 		{
 			"IsUnique separate instances don't care about dupes",
 			func() Validator { return MustCompile(Map{"a": IsUnique(), "b": IsUnique()}) },
-			common.MapStr{"a": 1, "b": 1},
+			Map{"a": 1, "b": 1},
 			true,
 		},
 		{
@@ -181,7 +180,7 @@ func TestIsUnique(t *testing.T) {
 				s := ScopedIsUnique()
 				return MustCompile(Map{"a": s.IsUniqueTo("test"), "b": s.IsUniqueTo("test2")})
 			},
-			common.MapStr{"a": 1, "b": 1},
+			Map{"a": 1, "b": 1},
 			false,
 		},
 
@@ -191,7 +190,7 @@ func TestIsUnique(t *testing.T) {
 				s := ScopedIsUnique()
 				return MustCompile(Map{"a": s.IsUniqueTo("test"), "b": s.IsUniqueTo("test")})
 			},
-			common.MapStr{"a": 1, "b": 1},
+			Map{"a": 1, "b": 1},
 			true,
 		},
 	}

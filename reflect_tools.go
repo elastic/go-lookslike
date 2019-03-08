@@ -19,12 +19,10 @@ package lookslike
 
 import (
 	"reflect"
-
-	"github.com/elastic/beats/libbeat/common"
 )
 
-func interfaceToMapStr(o interface{}) common.MapStr {
-	newMap := common.MapStr{}
+func interfaceToMapStr(o interface{}) Map {
+	newMap := Map{}
 	rv := reflect.ValueOf(o)
 
 	for _, key := range rv.MapKeys() {

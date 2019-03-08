@@ -20,8 +20,6 @@ package lookslike
 import (
 	"reflect"
 	"testing"
-
-	"github.com/elastic/beats/libbeat/common"
 )
 
 func TestPathComponentType_String(t *testing.T) {
@@ -242,35 +240,35 @@ func TestPath_GetFrom(t *testing.T) {
 	tests := []struct {
 		name       string
 		p          Path
-		arg        common.MapStr
+		arg        Map
 		wantValue  interface{}
 		wantExists bool
 	}{
 		{
 			"simple present",
 			fooPath,
-			common.MapStr{"foo": "bar"},
+			Map{"foo": "bar"},
 			"bar",
 			true,
 		},
 		{
 			"simple missing",
 			fooPath,
-			common.MapStr{},
+			Map{},
 			nil,
 			false,
 		},
 		{
 			"complex present",
 			complexPath,
-			common.MapStr{"foo": []interface{}{common.MapStr{"bar": []string{"bad", "good"}}}},
+			Map{"foo": []interface{}{Map{"bar": []string{"bad", "good"}}}},
 			"good",
 			true,
 		},
 		{
 			"complex missing",
 			complexPath,
-			common.MapStr{},
+			Map{},
 			nil,
 			false,
 		},

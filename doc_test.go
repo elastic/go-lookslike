@@ -20,13 +20,11 @@ package lookslike
 import (
 	"fmt"
 	"strings"
-
-	"github.com/elastic/beats/libbeat/common"
 )
 
 func Example() {
 	// Let's say we want to validate this map
-	data := common.MapStr{"foo": "bar", "baz": "bot", "count": 1}
+	data := Map{"foo": "bar", "baz": "bot", "count": 1}
 
 	// We can validate the data by creating a lookslike.Validator
 	// Validators are functions created by compiling the special lookslike.Map
@@ -85,7 +83,7 @@ func ExampleCompose() {
 	// Composition is useful when you need to share common validation logic between validators.
 	// Let's imagine that we want to validate maps describing pets.
 
-	pets := []common.MapStr{
+	pets := []Map{
 		{"Name": "rover", "barks": "often", "fur_length": "long"},
 		{"Name": "lucky", "barks": "rarely", "fur_length": "short"},
 		{"Name": "pounce", "meows": "often", "fur_length": "short"},
@@ -131,8 +129,8 @@ func ExampleCompose() {
 }
 
 func ExampleOptional() {
-	dataNoError := common.MapStr{"foo": "bar"}
-	dataError := common.MapStr{"foo": "bar", "error": true}
+	dataNoError := Map{"foo": "bar"}
+	dataError := Map{"foo": "bar", "error": true}
 
 	validator := MustCompile(Map{"foo": "bar", "error": Optional(IsEqual(true))})
 
@@ -147,7 +145,7 @@ func ExampleIs() {
 	// More advanced validations can be used with built-in and custom functions.
 	// These are represented with the IfDef type
 
-	data := common.MapStr{"foo": "bar", "count": 1}
+	data := Map{"foo": "bar", "count": 1}
 
 	// Values can also be tested programatically if a lookslike.IsDef is used as a value
 	// Here we'll define a custom IsDef using the lookslike DSL, then validate it.
@@ -181,7 +179,7 @@ func ExampleMap() {
 		"baz": "bot",
 	})
 
-	data := common.MapStr{
+	data := Map{
 		"foo": "bar",
 		"baz": "bot",
 	}
@@ -197,7 +195,7 @@ func ExampleSlice() {
 		"foo": Slice{"foo", IsNonEmptyString},
 	})
 
-	data := common.MapStr{"foo": []string{"foo", "something"}}
+	data := Map{"foo": []string{"foo", "something"}}
 
 	fmt.Printf("Result is %t", v(data).Valid)
 

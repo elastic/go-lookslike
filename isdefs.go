@@ -20,7 +20,6 @@ package lookslike
 
 import (
 	"fmt"
-	"github.com/elastic/beats/libbeat/common"
 	"reflect"
 	"regexp"
 	"strings"
@@ -135,7 +134,7 @@ func IsDeepEqual(to interface{}) IsDef {
 // via the given Validator.
 func IsArrayOf(validator Validator) IsDef {
 	return Is("array of maps", func(path Path, v interface{}) *Results {
-		vArr, isArr := v.([]common.MapStr)
+		vArr, isArr := v.([]Map)
 		if !isArr {
 			return SimpleResult(path, false, "Expected array at given path")
 		}

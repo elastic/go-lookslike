@@ -22,11 +22,9 @@ import (
 	"time"
 
 	"github.com/stretchr/testify/assert"
-
-	"github.com/elastic/beats/libbeat/common"
 )
 
-func assertValidator(t *testing.T, validator Validator, input common.MapStr) {
+func assertValidator(t *testing.T, validator Validator, input Map) {
 	res := validator(input)
 	assertResults(t, res)
 }
@@ -40,7 +38,7 @@ func assertResults(t *testing.T, r *Results) *Results {
 }
 
 func TestFlat(t *testing.T) {
-	m := common.MapStr{
+	m := Map{
 		"foo": "bar",
 		"baz": 1,
 	}
@@ -54,7 +52,7 @@ func TestFlat(t *testing.T) {
 }
 
 func TestBadFlat(t *testing.T) {
-	m := common.MapStr{}
+	m := Map{}
 
 	fakeT := new(testing.T)
 
@@ -72,8 +70,8 @@ func TestBadFlat(t *testing.T) {
 }
 
 func TestNested(t *testing.T) {
-	m := common.MapStr{
-		"foo": common.MapStr{
+	m := Map{
+		"foo": Map{
 			"bar": "baz",
 			"dur": time.Duration(100),
 		},
@@ -92,7 +90,7 @@ func TestNested(t *testing.T) {
 }
 
 func TestComposition(t *testing.T) {
-	m := common.MapStr{
+	m := Map{
 		"foo": "bar",
 		"baz": "bot",
 	}
@@ -123,11 +121,11 @@ func TestComposition(t *testing.T) {
 }
 
 func TestStrictFunc(t *testing.T) {
-	m := common.MapStr{
+	m := Map{
 		"foo": "bar",
 		"baz": "bot",
-		"nest": common.MapStr{
-			"very": common.MapStr{
+		"nest": Map{
+			"very": Map{
 				"deep": "true",
 			},
 		},
@@ -161,7 +159,7 @@ func TestStrictFunc(t *testing.T) {
 }
 
 func TestOptional(t *testing.T) {
-	m := common.MapStr{
+	m := Map{
 		"foo": "bar",
 	}
 
@@ -173,7 +171,7 @@ func TestOptional(t *testing.T) {
 }
 
 func TestExistence(t *testing.T) {
-	m := common.MapStr{
+	m := Map{
 		"exists": "foo",
 	}
 
@@ -186,18 +184,18 @@ func TestExistence(t *testing.T) {
 }
 
 func TestComplex(t *testing.T) {
-	m := common.MapStr{
+	m := Map{
 		"foo": "bar",
-		"hash": common.MapStr{
+		"hash": Map{
 			"baz": 1,
 			"bot": 2,
-			"deep_hash": common.MapStr{
+			"deep_hash": Map{
 				"qux": "quark",
 			},
 		},
 		"slice": []string{"pizza", "pasta", "and more"},
 		"empty": nil,
-		"arr":   []common.MapStr{{"foo": "bar"}, {"foo": "baz"}},
+		"arr":   []Map{{"foo": "bar"}, {"foo": "baz"}},
 	}
 
 	validator := MustCompile(Map{
@@ -219,7 +217,7 @@ func TestComplex(t *testing.T) {
 }
 
 func TestLiteralArray(t *testing.T) {
-	m := common.MapStr{
+	m := Map{
 		"a": []interface{}{
 			[]interface{}{1, 2, 3},
 			[]interface{}{"foo", "bar"},
@@ -244,7 +242,7 @@ func TestLiteralArray(t *testing.T) {
 }
 
 func TestStringSlice(t *testing.T) {
-	m := common.MapStr{
+	m := Map{
 		"a": []string{"a", "b"},
 	}
 
@@ -265,7 +263,7 @@ func TestEmptySlice(t *testing.T) {
 	// In this case we're treating the slice as a value and doing a literal comparison
 	// Users should use an IsDef testing for an empty slice (that can use reflection)
 	// if they need something else.
-	m := common.MapStr{
+	m := Map{
 		"a": []interface{}{},
 		"b": []string{},
 	}
@@ -282,7 +280,7 @@ func TestEmptySlice(t *testing.T) {
 }
 
 func TestLiteralMdSlice(t *testing.T) {
-	m := common.MapStr{
+	m := Map{
 		"a": [][]int{
 			{1, 2, 3},
 			{4, 5, 6},
@@ -318,7 +316,7 @@ func TestLiteralMdSlice(t *testing.T) {
 }
 
 func TestSliceOfIsDefs(t *testing.T) {
-	m := common.MapStr{
+	m := Map{
 		"a": []int{1, 2, 3},
 		"b": []interface{}{"foo", "bar", 3},
 	}
@@ -341,7 +339,7 @@ func TestSliceOfIsDefs(t *testing.T) {
 }
 
 func TestMatchArrayAsValue(t *testing.T) {
-	m := common.MapStr{
+	m := Map{
 		"a": []int{1, 2, 3},
 		"b": []interface{}{"foo", "bar", 3},
 	}

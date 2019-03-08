@@ -23,8 +23,6 @@ import (
 	"regexp"
 	"strconv"
 	"strings"
-
-	"github.com/elastic/beats/libbeat/common"
 )
 
 // pathComponentType indicates the type of pathComponent.
@@ -113,7 +111,7 @@ func (p Path) Last() *pathComponent {
 }
 
 // GetFrom takes a map and fetches the given Path from it.
-func (p Path) GetFrom(m common.MapStr) (value interface{}, exists bool) {
+func (p Path) GetFrom(m Map) (value interface{}, exists bool) {
 	value = m
 	exists = true
 	for _, pc := range p {

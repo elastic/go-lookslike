@@ -21,8 +21,6 @@ import (
 	"reflect"
 	"sort"
 	"strings"
-
-	"github.com/elastic/beats/libbeat/common"
 )
 
 // Is creates a named IsDef with the given Checker.
@@ -46,11 +44,11 @@ type Map map[string]interface{}
 type Slice []interface{}
 
 // Validator is the result of Compile and is run against the map you'd like to test.
-type Validator func(common.MapStr) *Results
+type Validator func(Map) *Results
 
 // Compose combines multiple SchemaValidators into a single one.
 func Compose(validators ...Validator) Validator {
-	return func(actual common.MapStr) *Results {
+	return func(actual Map) *Results {
 		results := make([]*Results, len(validators))
 		for idx, validator := range validators {
 			results[idx] = validator(actual)
@@ -69,7 +67,7 @@ func Compose(validators ...Validator) Validator {
 
 // Strict is used when you want any unspecified keys that are encountered to be considered errors.
 func Strict(laxValidator Validator) Validator {
-	return func(actual common.MapStr) *Results {
+	return func(actual Map) *Results {
 		results := laxValidator(actual)
 
 		// The inner workings of this are a little weird
@@ -115,7 +113,7 @@ func Strict(laxValidator Validator) Validator {
 // a Validator that can Check real data.
 func Compile(in Map) (validator Validator, err error) {
 	compiled := make(CompiledSchema, 0)
-	err = walk(common.MapStr(in), true, func(current walkObserverInfo) error {
+	err = walk(Map(in), true, func(current walkObserverInfo) error {
 
 		// Determine whether we should test this value
 		// We want to test all values except collections that contain a value
@@ -136,7 +134,7 @@ func Compile(in Map) (validator Validator, err error) {
 		return nil
 	})
 
-	return func(actual common.MapStr) *Results {
+	return func(actual Map) *Results {
 		return compiled.Check(actual)
 	}, err
 }

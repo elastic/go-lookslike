@@ -17,8 +17,6 @@
 
 package lookslike
 
-import "github.com/elastic/beats/libbeat/common"
-
 type flatValidator struct {
 	path  Path
 	isDef IsDef
@@ -28,7 +26,7 @@ type flatValidator struct {
 type CompiledSchema []flatValidator
 
 // Check executes the the checks within the CompiledSchema
-func (cs CompiledSchema) Check(actual common.MapStr) *Results {
+func (cs CompiledSchema) Check(actual Map) *Results {
 	results := NewResults()
 	for _, pv := range cs {
 		actualV, actualKeyExists := pv.path.GetFrom(actual)
