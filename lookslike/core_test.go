@@ -18,6 +18,7 @@
 package lookslike
 
 import (
+	"regexp"
 	"testing"
 	"time"
 
@@ -70,13 +71,40 @@ func TestBadFlat(t *testing.T) {
 }
 
 func TestScalar(t *testing.T) {
+	results := MustCompile(IsEqual(42))(42)
+	assertResults(t, results)
+}
+
+func TestBadScalar(t *testing.T) {
 	fakeT := new(testing.T)
 
-	results := MustCompile(IsEqual(42))(42)
+	results := MustCompile(IsEqual(42))(-1)
 
 	assertResults(fakeT, results)
 
-	assert.False(t, fakeT.Failed())
+	assert.True(t, fakeT.Failed())
+
+	result := results.Fields[""][0]
+	assert.False(t, result.Valid)
+}
+
+func TestScalarTypeMismatch(t *testing.T) {
+	fakeT := new(testing.T)
+
+	results := MustCompile(IsEqual(42))("foo")
+
+	assertResults(fakeT, results)
+
+	assert.True(t, fakeT.Failed())
+
+	result := results.Fields[""][0]
+	assert.False(t, result.Valid)
+}
+
+func TestSlice(t *testing.T) {
+	actual := []interface{}{42, time.Second, "admiral akbar"}
+	results := MustCompile(Slice{42, IsDuration, IsStringMatching(regexp.MustCompile("bar"))})(actual)
+	assertResults(t, results)
 }
 
 func TestNested(t *testing.T) {

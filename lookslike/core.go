@@ -154,7 +154,7 @@ func CompileIsDef(def IsDef) (validator Validator, err error) {
 	}, nil
 }
 
-func setupWalkObserver() (walkObserver, CompiledSchema) {
+func setupWalkObserver() (walkObserver, *CompiledSchema) {
 	compiled := make(CompiledSchema, 0)
 	return func(current walkObserverInfo) error {
 		// Determine whether we should test this value
@@ -174,7 +174,7 @@ func setupWalkObserver() (walkObserver, CompiledSchema) {
 			compiled = append(compiled, flatValidator{current.path, isDef})
 		}
 		return nil
-	}, compiled
+	}, &compiled
 }
 
 // MustCompile compiles the given validation, panic-ing if that map is invalid.

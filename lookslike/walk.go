@@ -66,7 +66,12 @@ func walkScalar(s Scalar, expandPaths bool, wo walkObserver) error {
 func walkFull(o interface{}, root Map, path Path, expandPaths bool, wo walkObserver) (err error) {
 	lastPathComponent := path.Last()
 	if lastPathComponent == nil {
-		panic("Attempted to traverse an empty Path in lookslike.walkFull, this should never happen.")
+		// In the case of a slice we can have an empty path
+		if _, ok := o.(Slice); ok {
+			lastPathComponent = &pathComponent{}
+		} else {
+			panic("Attempted to traverse an empty Path on a Map in lookslike.walkFull, this should never happen.")
+		}
 	}
 
 	err = wo(walkObserverInfo{*lastPathComponent, o, root, path})

@@ -94,7 +94,11 @@ func (r *Results) record(path Path, result ValueResult) {
 func (r Results) EachResult(f func(Path, ValueResult) bool) {
 	for path, pathResults := range r.Fields {
 		for _, result := range pathResults {
-			if !f(MustParsePath(path), result) {
+			// We can ignore path parse errors here, those are from scalars and other
+			// types that have an invalid string path
+			// TODO: Find a cleaner way to do this
+			parsed, _ := ParsePath(path)
+			if !f(parsed, result) {
 				return
 			}
 		}

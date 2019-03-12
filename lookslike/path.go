@@ -33,6 +33,8 @@ const (
 	pcMapKey pathComponentType = 1 + iota
 	// pcSliceIdx is the Type for slice indices.
 	pcSliceIdx
+	//
+	pcScalar
 )
 
 func (pct pathComponentType) String() string {
@@ -40,6 +42,8 @@ func (pct pathComponentType) String() string {
 		return "map"
 	} else if pct == pcSliceIdx {
 		return "slice"
+	} else if pct == pcScalar {
+		return "scalar"
 	} else {
 		// This should never happen, but we don't want to return an
 		// error since that would unnecessarily complicate the fluid API
@@ -173,7 +177,7 @@ func ParsePath(in string) (p Path, err error) {
 			pc.Type = pcMapKey
 			pc.Key = part
 		} else {
-			return p, InvalidPathString(in)
+			return nil, InvalidPathString(in)
 		}
 
 		p[idx] = pc
