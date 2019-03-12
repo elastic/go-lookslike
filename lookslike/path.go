@@ -111,7 +111,7 @@ func (p Path) Last() *pathComponent {
 }
 
 // GetFrom takes a map and fetches the given Path from it.
-func (p Path) GetFrom(m Map) (value interface{}, exists bool) {
+func (p Path) GetFrom(m interface{}) (value interface{}, exists bool) {
 	value = m
 	exists = true
 	for _, pc := range p {
@@ -151,7 +151,7 @@ var arrMatcher = regexp.MustCompile("\\[(\\d+)\\]")
 type InvalidPathString string
 
 func (ps InvalidPathString) Error() string {
-	return fmt.Sprintf("Invalid Path Path: %#v", ps)
+	return fmt.Sprintf("Invalid Path: %#v", ps)
 }
 
 // ParsePath parses a Path of form key.[0].otherKey.[1] into a Path object.

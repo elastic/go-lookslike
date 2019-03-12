@@ -69,6 +69,16 @@ func TestBadFlat(t *testing.T) {
 	assert.Equal(t, result, KeyMissingVR)
 }
 
+func TestScalar(t *testing.T) {
+	fakeT := new(testing.T)
+
+	results := MustCompile(IsEqual(42))(42)
+
+	assertResults(fakeT, results)
+
+	assert.False(t, fakeT.Failed())
+}
+
 func TestNested(t *testing.T) {
 	m := Map{
 		"foo": Map{

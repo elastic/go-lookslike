@@ -31,9 +31,36 @@ type walkObserverInfo struct {
 // walkObserver functions run once per object in the tree.
 type walkObserver func(info walkObserverInfo) error
 
-// walk is a shorthand way to walk a tree.
-func walk(m Map, expandPaths bool, wo walkObserver) error {
+// walk determine if in is a `Map` or a `Slice` and traverse it if so, otherwise will
+// treat it as a scalar and invoke the walk observer on the input value directly.
+func walk(in interface{}, expandPaths bool, wo walkObserver) error {
+	switch in.(type) {
+	case Map:
+		return walkMap(in.(Map), expandPaths, wo)
+	case Slice:
+		return walkSlice(in.(Slice), expandPaths, wo)
+	default:
+		return walkScalar(in.(Scalar), expandPaths, wo)
+	}
+}
+
+// walkMap is a shorthand way to walk a tree with a map as the root.
+func walkMap(m Map, expandPaths bool, wo walkObserver) error {
 	return walkFullMap(m, m, Path{}, expandPaths, wo)
+}
+
+// walkSlice walks the provided root slice.
+func walkSlice(s Slice, expandPaths bool, wo walkObserver) error {
+	return walkFull(s, Map{}, Path{}, expandPaths, wo)
+}
+
+func walkScalar(s Scalar, expandPaths bool, wo walkObserver) error {
+	return wo(walkObserverInfo{
+		value: s,
+		key: pathComponent{},
+		rootMap: Map{},
+		path: Path{},
+	})
 }
 
 func walkFull(o interface{}, root Map, path Path, expandPaths bool, wo walkObserver) (err error) {

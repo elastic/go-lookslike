@@ -18,6 +18,8 @@
 package lookslike
 
 import (
+	"errors"
+	"fmt"
 	"reflect"
 	"sort"
 	"strings"
@@ -43,12 +45,15 @@ type Map map[string]interface{}
 // a Map as a value, and it would be able to match against any type of non-empty slice.
 type Slice []interface{}
 
+// Catchall type for things that aren't assertable to either Map or Slice.
+type Scalar interface{}
+
 // Validator is the result of Compile and is run against the map you'd like to test.
-type Validator func(Map) *Results
+type Validator func(interface{}) *Results
 
 // Compose combines multiple SchemaValidators into a single one.
 func Compose(validators ...Validator) Validator {
-	return func(actual Map) *Results {
+	return func(actual interface{}) *Results {
 		results := make([]*Results, len(validators))
 		for idx, validator := range validators {
 			results[idx] = validator(actual)
@@ -67,7 +72,7 @@ func Compose(validators ...Validator) Validator {
 
 // Strict is used when you want any unspecified keys that are encountered to be considered errors.
 func Strict(laxValidator Validator) Validator {
-	return func(actual Map) *Results {
+	return func(actual interface{}) *Results {
 		results := laxValidator(actual)
 
 		// The inner workings of this are a little weird
@@ -109,12 +114,49 @@ func Strict(laxValidator Validator) Validator {
 	}
 }
 
-// Compile takes the given map, validates the paths within it, and returns
-// a Validator that can Check real data.
-func Compile(in Map) (validator Validator, err error) {
-	compiled := make(CompiledSchema, 0)
-	err = walk(Map(in), true, func(current walkObserverInfo) error {
+func Compile(in interface{}) (validator Validator, err error) {
+	switch in.(type) {
+	case Map:
+		return CompileMap(in.(Map))
+	case Slice:
+		return CompileSlice(in.(Slice))
+	case IsDef:
+		return CompileIsDef(in.(IsDef))
+	default:
+		msg := fmt.Sprintf("Cannot compile definition from %v (%T). Expected one of 'Map', 'Slice', or 'IsDef'", in, in)
+		return nil, errors.New(msg)
+	}
+}
 
+// CompileMap takes the given map, validates the paths within it, and returns
+// a Validator that can Check real data.
+func CompileMap(in Map) (validator Validator, err error) {
+	wo, compiled := setupWalkObserver()
+	err = walkMap(in, true, wo)
+
+	return func(actual interface{}) *Results {
+		return compiled.Check(actual)
+	}, err
+}
+
+func CompileSlice(in Slice) (validator Validator, err error) {
+	wo, compiled := setupWalkObserver()
+	err = walkSlice(in, true, wo)
+
+	return func(actual interface{}) *Results {
+		return compiled.Check(actual)
+	}, err
+}
+
+func CompileIsDef(def IsDef) (validator Validator, err error) {
+	return func(actual interface{}) *Results {
+		return def.Check(Path{}, actual, true)
+	}, nil
+}
+
+func setupWalkObserver() (walkObserver, CompiledSchema) {
+	compiled := make(CompiledSchema, 0)
+	return func(current walkObserverInfo) error {
 		// Determine whether we should test this value
 		// We want to test all values except collections that contain a value
 		// If a collection contains a value, we Check those 'leaf' values instead
@@ -132,15 +174,11 @@ func Compile(in Map) (validator Validator, err error) {
 			compiled = append(compiled, flatValidator{current.path, isDef})
 		}
 		return nil
-	})
-
-	return func(actual Map) *Results {
-		return compiled.Check(actual)
-	}, err
+	}, compiled
 }
 
-// MustCompile compiles the given map, panic-ing if that map is invalid.
-func MustCompile(in Map) Validator {
+// MustCompile compiles the given validation, panic-ing if that map is invalid.
+func MustCompile(in interface{}) Validator {
 	compiled, err := Compile(in)
 	if err != nil {
 		panic(err)
