@@ -49,7 +49,7 @@ func walkFull(o interface{}, root Map, path Path, expandPaths bool, wo walkObser
 
 	switch reflect.TypeOf(o).Kind() {
 	case reflect.Map:
-		converted := interfaceToMapStr(o)
+		converted := interfaceToMap(o)
 		err := walkFullMap(converted, root, path, expandPaths, wo)
 		if err != nil {
 			return err
@@ -69,7 +69,7 @@ func walkFull(o interface{}, root Map, path Path, expandPaths bool, wo walkObser
 	return nil
 }
 
-// walkFullMap walks the given MapStr tree.
+// walkFullMap walks the given Map tree.
 func walkFullMap(m Map, root Map, p Path, expandPaths bool, wo walkObserver) (err error) {
 	for k, v := range m {
 		var newPath Path

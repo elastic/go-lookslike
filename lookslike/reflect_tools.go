@@ -21,7 +21,7 @@ import (
 	"reflect"
 )
 
-func interfaceToMapStr(o interface{}) Map {
+func interfaceToMap(o interface{}) Map {
 	newMap := Map{}
 	rv := reflect.ValueOf(o)
 

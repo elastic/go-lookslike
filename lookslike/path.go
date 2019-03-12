@@ -118,7 +118,7 @@ func (p Path) GetFrom(m Map) (value interface{}, exists bool) {
 		rt := reflect.TypeOf(value)
 		switch rt.Kind() {
 		case reflect.Map:
-			converted := interfaceToMapStr(value)
+			converted := interfaceToMap(value)
 			value, exists = converted[pc.Key]
 		case reflect.Slice:
 			converted := sliceToSliceOfInterfaces(value)
