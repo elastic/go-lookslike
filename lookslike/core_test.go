@@ -39,7 +39,8 @@ func assertResults(t *testing.T, r *Results) *Results {
 }
 
 func TestFlat(t *testing.T) {
-	m := Map{
+	// Test map[string]interface{} as a user would more likely use
+	m := map[string]interface{}{
 		"foo": "bar",
 		"baz": 1,
 	}
@@ -53,7 +54,7 @@ func TestFlat(t *testing.T) {
 }
 
 func TestBadFlat(t *testing.T) {
-	m := Map{}
+	m := map[string]interface{}{}
 
 	fakeT := new(testing.T)
 
@@ -105,6 +106,21 @@ func TestSlice(t *testing.T) {
 	actual := []interface{}{42, time.Second, "admiral akbar"}
 	results := MustCompile(Slice{42, IsDuration, IsStringMatching(regexp.MustCompile("bar"))})(actual)
 	assertResults(t, results)
+}
+
+func TestBadSlice(t *testing.T) {
+	fakeT := new(testing.T)
+
+	actual := []interface{}{42, time.Second, "admiral akbar"}
+	results := MustCompile(Slice{42, IsDuration, IsStringMatching(regexp.MustCompile("NOTHERE"))})(actual)
+
+	assertResults(fakeT, results)
+
+	assert.True(t, fakeT.Failed())
+
+	assert.True(t, results.Fields["[0]"][0].Valid)
+	assert.True(t, results.Fields["[1]"][0].Valid)
+	assert.False(t, results.Fields["[2]"][0].Valid)
 }
 
 func TestNested(t *testing.T) {
