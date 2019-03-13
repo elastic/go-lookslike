@@ -39,6 +39,8 @@ func walk(in interface{}, expandPaths bool, wo walkObserver) error {
 		return walkMap(in.(Map), expandPaths, wo)
 	case Slice:
 		return walkSlice(in.(Slice), expandPaths, wo)
+	case []interface{}:
+		return walkSlice(Slice(in.([]interface{})), expandPaths, wo)
 	default:
 		return walkScalar(in.(Scalar), expandPaths, wo)
 	}
@@ -51,7 +53,7 @@ func walkMap(m Map, expandPaths bool, wo walkObserver) error {
 
 // walkSlice walks the provided root slice.
 func walkSlice(s Slice, expandPaths bool, wo walkObserver) error {
-	return walkFull(s, Map{}, Path{}, expandPaths, wo)
+	return walkFullSlice(s, Map{}, Path{}, expandPaths, wo)
 }
 
 func walkScalar(s Scalar, expandPaths bool, wo walkObserver) error {
@@ -114,6 +116,20 @@ func walkFullMap(m Map, root Map, p Path, expandPaths bool, wo walkObserver) (er
 			}
 			newPath = p.Concat(additionalPath)
 		}
+
+		err = walkFull(v, root, newPath, expandPaths, wo)
+		if err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+func walkFullSlice(s Slice, root Map, p Path, expandPaths bool, wo walkObserver) (err error) {
+	for idx, v := range s {
+		var newPath Path
+		newPath = p.ExtendSlice(idx)
 
 		err = walkFull(v, root, newPath, expandPaths, wo)
 		if err != nil {

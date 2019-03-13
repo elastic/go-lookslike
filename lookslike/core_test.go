@@ -123,6 +123,44 @@ func TestBadSlice(t *testing.T) {
 	assert.False(t, results.Fields["[2]"][0].Valid)
 }
 
+func TestSliceStrictness(t *testing.T) {
+	// Test that different slice lengths cause a failure
+	fakeT := new(testing.T)
+
+	actual := []interface{}{42, time.Second, "admiral akbar", "EXTRA"}
+	// One less item than the real thing
+	results := MustCompile(Slice{42, IsDuration, IsStringMatching(regexp.MustCompile("bar"))})(actual)
+
+	assertResults(fakeT, results)
+
+	assert.True(t, fakeT.Failed())
+
+	assert.True(t, results.Fields["[0]"][0].Valid)
+	assert.True(t, results.Fields["[1]"][0].Valid)
+	assert.True(t, results.Fields["[2]"][0].Valid)
+}
+
+func TestPrimitiveSlice(t *testing.T) {
+	actual := []int{1, 1, 2, 3}
+	results := MustCompile(Slice{1, 1, 2, 3})(actual)
+	assertResults(t, results)
+}
+
+func TestBadPrimitiveSlice(t *testing.T) {
+	fakeT := new(testing.T)
+
+	actual := []int{1, 2, 3}
+	results := MustCompile(Slice{1, 1, 1})(actual)
+
+	assertResults(fakeT, results)
+
+	assert.True(t, fakeT.Failed())
+
+	assert.True(t, results.Fields["[0]"][0].Valid)
+	assert.False(t, results.Fields["[1]"][0].Valid)
+	assert.False(t, results.Fields["[2]"][0].Valid)
+}
+
 func TestNested(t *testing.T) {
 	m := Map{
 		"foo": Map{

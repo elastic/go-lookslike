@@ -117,20 +117,18 @@ func Strict(laxValidator Validator) Validator {
 func Compile(in interface{}) (validator Validator, err error) {
 	switch in.(type) {
 	case Map:
-		return CompileMap(in.(Map))
+		return compileMap(in.(Map))
 	case Slice:
-		return CompileSlice(in.(Slice))
+		return compileSlice(in.(Slice))
 	case IsDef:
-		return CompileIsDef(in.(IsDef))
+		return compileIsDef(in.(IsDef))
 	default:
 		msg := fmt.Sprintf("Cannot compile definition from %v (%T). Expected one of 'Map', 'Slice', or 'IsDef'", in, in)
 		return nil, errors.New(msg)
 	}
 }
 
-// CompileMap takes the given map, validates the paths within it, and returns
-// a Validator that can Check real data.
-func CompileMap(in Map) (validator Validator, err error) {
+func compileMap(in Map) (validator Validator, err error) {
 	wo, compiled := setupWalkObserver()
 	err = walkMap(in, true, wo)
 
@@ -139,16 +137,18 @@ func CompileMap(in Map) (validator Validator, err error) {
 	}, err
 }
 
-func CompileSlice(in Slice) (validator Validator, err error) {
+func compileSlice(in Slice) (validator Validator, err error) {
 	wo, compiled := setupWalkObserver()
 	err = walkSlice(in, true, wo)
 
-	return func(actual interface{}) *Results {
+	// Slices are always strict in validation because
+	// it would be surprising to only validate the first specified values
+	return Strict(func(actual interface{}) *Results {
 		return compiled.Check(actual)
-	}, err
+	}), err
 }
 
-func CompileIsDef(def IsDef) (validator Validator, err error) {
+func compileIsDef(def IsDef) (validator Validator, err error) {
 	return func(actual interface{}) *Results {
 		return def.Check(Path{}, actual, true)
 	}, nil
