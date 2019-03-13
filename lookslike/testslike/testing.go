@@ -15,9 +15,10 @@
 // specific language governing permissions and limitations
 // under the License.
 
-package lookslike
+package testslike
 
 import (
+	"github.com/elastic/lookslike/lookslike"
 	"testing"
 
 	"github.com/davecgh/go-spew/spew"
@@ -26,14 +27,14 @@ import (
 
 // Test takes the output from a Validator invocation and runs test assertions on the result.
 // If you are using this library for testing you will probably want to run Test(t, Compile(Map{...}), actual) as a pattern.
-func Test(t *testing.T, v Validator, m Map) *Results {
-	r := v(m)
+func Test(t *testing.T, validator lookslike.Validator, value interface{}) *lookslike.Results {
+	r := validator(value)
 
 	if !r.Valid {
 		assert.Fail(
 			t,
 			"lookslike could not validate map",
-			"%d errors validating source: \n%s", len(r.Errors()), spew.Sdump(m),
+			"%d errors validating source: \n%s", len(r.Errors()), spew.Sdump(value),
 		)
 	}
 
