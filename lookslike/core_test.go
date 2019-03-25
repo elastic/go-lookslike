@@ -18,6 +18,7 @@
 package lookslike
 
 import (
+	"regexp"
 	"testing"
 	"time"
 
@@ -38,7 +39,8 @@ func assertResults(t *testing.T, r *Results) *Results {
 }
 
 func TestFlat(t *testing.T) {
-	m := Map{
+	// Test map[string]interface{} as a user would more likely use
+	m := map[string]interface{}{
 		"foo": "bar",
 		"baz": 1,
 	}
@@ -52,7 +54,7 @@ func TestFlat(t *testing.T) {
 }
 
 func TestBadFlat(t *testing.T) {
-	m := Map{}
+	m := map[string]interface{}{}
 
 	fakeT := new(testing.T)
 
@@ -67,6 +69,96 @@ func TestBadFlat(t *testing.T) {
 	result := results.Fields["notafield"][0]
 	assert.False(t, result.Valid)
 	assert.Equal(t, result, KeyMissingVR)
+}
+
+func TestScalar(t *testing.T) {
+	results := MustCompile(IsEqual(42))(42)
+	assertResults(t, results)
+}
+
+func TestBadScalar(t *testing.T) {
+	fakeT := new(testing.T)
+
+	results := MustCompile(IsEqual(42))(-1)
+
+	assertResults(fakeT, results)
+
+	assert.True(t, fakeT.Failed())
+
+	result := results.Fields[""][0]
+	assert.False(t, result.Valid)
+}
+
+func TestScalarTypeMismatch(t *testing.T) {
+	fakeT := new(testing.T)
+
+	results := MustCompile(IsEqual(42))("foo")
+
+	assertResults(fakeT, results)
+
+	assert.True(t, fakeT.Failed())
+
+	result := results.Fields[""][0]
+	assert.False(t, result.Valid)
+}
+
+func TestSlice(t *testing.T) {
+	actual := []interface{}{42, time.Second, "admiral akbar"}
+	results := MustCompile(Slice{42, IsDuration, IsStringMatching(regexp.MustCompile("bar"))})(actual)
+	assertResults(t, results)
+}
+
+func TestBadSlice(t *testing.T) {
+	fakeT := new(testing.T)
+
+	actual := []interface{}{42, time.Second, "admiral akbar"}
+	results := MustCompile(Slice{42, IsDuration, IsStringMatching(regexp.MustCompile("NOTHERE"))})(actual)
+
+	assertResults(fakeT, results)
+
+	assert.True(t, fakeT.Failed())
+
+	assert.True(t, results.Fields["[0]"][0].Valid)
+	assert.True(t, results.Fields["[1]"][0].Valid)
+	assert.False(t, results.Fields["[2]"][0].Valid)
+}
+
+func TestSliceStrictness(t *testing.T) {
+	// Test that different slice lengths cause a failure
+	fakeT := new(testing.T)
+
+	actual := []interface{}{42, time.Second, "admiral akbar", "EXTRA"}
+	// One less item than the real thing
+	results := MustCompile(Slice{42, IsDuration, IsStringMatching(regexp.MustCompile("bar"))})(actual)
+
+	assertResults(fakeT, results)
+
+	assert.True(t, fakeT.Failed())
+
+	assert.True(t, results.Fields["[0]"][0].Valid)
+	assert.True(t, results.Fields["[1]"][0].Valid)
+	assert.True(t, results.Fields["[2]"][0].Valid)
+}
+
+func TestPrimitiveSlice(t *testing.T) {
+	actual := []int{1, 1, 2, 3}
+	results := MustCompile(Slice{1, 1, 2, 3})(actual)
+	assertResults(t, results)
+}
+
+func TestBadPrimitiveSlice(t *testing.T) {
+	fakeT := new(testing.T)
+
+	actual := []int{1, 2, 3}
+	results := MustCompile(Slice{1, 1, 1})(actual)
+
+	assertResults(fakeT, results)
+
+	assert.True(t, fakeT.Failed())
+
+	assert.True(t, results.Fields["[0]"][0].Valid)
+	assert.False(t, results.Fields["[1]"][0].Valid)
+	assert.False(t, results.Fields["[2]"][0].Valid)
 }
 
 func TestNested(t *testing.T) {

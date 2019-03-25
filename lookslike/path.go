@@ -33,6 +33,8 @@ const (
 	pcMapKey pathComponentType = 1 + iota
 	// pcSliceIdx is the Type for slice indices.
 	pcSliceIdx
+	//
+	pcScalar
 )
 
 func (pct pathComponentType) String() string {
@@ -40,6 +42,8 @@ func (pct pathComponentType) String() string {
 		return "map"
 	} else if pct == pcSliceIdx {
 		return "slice"
+	} else if pct == pcScalar {
+		return "scalar"
 	} else {
 		// This should never happen, but we don't want to return an
 		// error since that would unnecessarily complicate the fluid API
@@ -111,7 +115,7 @@ func (p Path) Last() *pathComponent {
 }
 
 // GetFrom takes a map and fetches the given Path from it.
-func (p Path) GetFrom(m Map) (value interface{}, exists bool) {
+func (p Path) GetFrom(m interface{}) (value interface{}, exists bool) {
 	value = m
 	exists = true
 	for _, pc := range p {
@@ -151,7 +155,7 @@ var arrMatcher = regexp.MustCompile("\\[(\\d+)\\]")
 type InvalidPathString string
 
 func (ps InvalidPathString) Error() string {
-	return fmt.Sprintf("Invalid Path Path: %#v", ps)
+	return fmt.Sprintf("Invalid Path: %#v", ps)
 }
 
 // ParsePath parses a Path of form key.[0].otherKey.[1] into a Path object.
@@ -173,7 +177,7 @@ func ParsePath(in string) (p Path, err error) {
 			pc.Type = pcMapKey
 			pc.Key = part
 		} else {
-			return p, InvalidPathString(in)
+			return nil, InvalidPathString(in)
 		}
 
 		p[idx] = pc

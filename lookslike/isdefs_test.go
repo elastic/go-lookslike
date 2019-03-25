@@ -198,7 +198,7 @@ func TestIsUnique(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 
 			if tt.isValid {
-				Test(t, tt.validator(), tt.data)
+				assert.True(t, tt.validator()(tt.data).Valid)
 			} else {
 				result := tt.validator()(tt.data)
 				require.False(t, result.Valid)

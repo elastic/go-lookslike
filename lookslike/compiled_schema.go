@@ -26,7 +26,7 @@ type flatValidator struct {
 type CompiledSchema []flatValidator
 
 // Check executes the the checks within the CompiledSchema
-func (cs CompiledSchema) Check(actual Map) *Results {
+func (cs CompiledSchema) Check(actual interface{}) *Results {
 	results := NewResults()
 	for _, pv := range cs {
 		actualV, actualKeyExists := pv.path.GetFrom(actual)

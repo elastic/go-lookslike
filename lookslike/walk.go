@@ -31,15 +31,49 @@ type walkObserverInfo struct {
 // walkObserver functions run once per object in the tree.
 type walkObserver func(info walkObserverInfo) error
 
-// walk is a shorthand way to walk a tree.
-func walk(m Map, expandPaths bool, wo walkObserver) error {
+// walk determine if in is a `Map` or a `Slice` and traverse it if so, otherwise will
+// treat it as a scalar and invoke the walk observer on the input value directly.
+func walk(in interface{}, expandPaths bool, wo walkObserver) error {
+	switch in.(type) {
+	case Map:
+		return walkMap(in.(Map), expandPaths, wo)
+	case Slice:
+		return walkSlice(in.(Slice), expandPaths, wo)
+	case []interface{}:
+		return walkSlice(Slice(in.([]interface{})), expandPaths, wo)
+	default:
+		return walkScalar(in.(Scalar), expandPaths, wo)
+	}
+}
+
+// walkMap is a shorthand way to walk a tree with a map as the root.
+func walkMap(m Map, expandPaths bool, wo walkObserver) error {
 	return walkFullMap(m, m, Path{}, expandPaths, wo)
+}
+
+// walkSlice walks the provided root slice.
+func walkSlice(s Slice, expandPaths bool, wo walkObserver) error {
+	return walkFullSlice(s, Map{}, Path{}, expandPaths, wo)
+}
+
+func walkScalar(s Scalar, expandPaths bool, wo walkObserver) error {
+	return wo(walkObserverInfo{
+		value: s,
+		key: pathComponent{},
+		rootMap: Map{},
+		path: Path{},
+	})
 }
 
 func walkFull(o interface{}, root Map, path Path, expandPaths bool, wo walkObserver) (err error) {
 	lastPathComponent := path.Last()
 	if lastPathComponent == nil {
-		panic("Attempted to traverse an empty Path in lookslike.walkFull, this should never happen.")
+		// In the case of a slice we can have an empty path
+		if _, ok := o.(Slice); ok {
+			lastPathComponent = &pathComponent{}
+		} else {
+			panic("Attempted to traverse an empty Path on a Map in lookslike.walkFull, this should never happen.")
+		}
 	}
 
 	err = wo(walkObserverInfo{*lastPathComponent, o, root, path})
@@ -82,6 +116,20 @@ func walkFullMap(m Map, root Map, p Path, expandPaths bool, wo walkObserver) (er
 			}
 			newPath = p.Concat(additionalPath)
 		}
+
+		err = walkFull(v, root, newPath, expandPaths, wo)
+		if err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+func walkFullSlice(s Slice, root Map, p Path, expandPaths bool, wo walkObserver) (err error) {
+	for idx, v := range s {
+		var newPath Path
+		newPath = p.ExtendSlice(idx)
 
 		err = walkFull(v, root, newPath, expandPaths, wo)
 		if err != nil {
