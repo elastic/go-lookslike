@@ -1,5 +1,11 @@
 language: go
 
-go:
-  - '1.12.1'
-  - 'tip'
+matrix:
+  include:
+    - go: 1.12.x
+      script:
+        - if [[ -z $(gofmt -d .) ]]; then true; else gofmt -d . && false; fi
+        - go test -v -race ./...
+    - go: tip
+      script:
+        - go test -v -race ./...
