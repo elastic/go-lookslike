@@ -296,7 +296,7 @@ func TestComplex(t *testing.T) {
 		"slice":        []string{"pizza", "pasta", "and more"},
 		"empty":        isdefs.KeyPresent,
 		"doesNotExist": isdefs.KeyMissing,
-		"arr":          isdefs.IsArrayOf(MustCompile(validator.Map{"foo": isdefs.IsStringContaining("a")})),
+		"arr":          isdefs.IsSliceOf(MustCompile(validator.Map{"foo": isdefs.IsStringContaining("a")})),
 	})
 
 	assertValidator(t, validator, m)
