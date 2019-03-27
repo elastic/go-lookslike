@@ -17,9 +17,9 @@ func TestIsSliceOf(t *testing.T) {
 	isFooBarMap := IsSliceOf(func(i interface{}) *results.Results {
 		if reflect.DeepEqual(i, goodMap) {
 			return results.ValidResult(paths.MustParsePath("foo"))
-		} else {
-			return results.SimpleResult(paths.MustParsePath("foo"), false, "did not match")
 		}
+
+		return results.SimpleResult(paths.MustParsePath("foo"), false, "did not match")
 	})
 
 	goodMapArr := []validator.Map{goodMap, goodMap}

@@ -27,7 +27,7 @@ import (
 	"github.com/elastic/lookslike/lookslike/util"
 )
 
-// pathComponentType indicates the type of PathComponent.
+// PathComponentType indicates the type of PathComponent.
 type PathComponentType int
 
 const (
@@ -77,13 +77,14 @@ func (p Path) ExtendSlice(index int) Path {
 	)
 }
 
-// Extendvalidator.Map adds a new PathComponent of the pcMapKey type.
+// ExtendMap adds a new PathComponent of the pcMapKey type.
 func (p Path) ExtendMap(key string) Path {
 	return p.Extend(
 		PathComponent{pcMapKey, key, -1},
 	)
 }
 
+// Extends lengthens the given path with the given component.
 func (p Path) Extend(pc PathComponent) Path {
 	out := make(Path, len(p)+1)
 	copy(out, p)

@@ -453,7 +453,7 @@ func TestMatchArrayAsValue(t *testing.T) {
 
 func TestInvalidPathIsdef(t *testing.T) {
 	badPath := "foo...bar"
-	_, err := Compile(validator.Map{
+	_, err := compile(validator.Map{
 		badPath: "invalid",
 	})
 

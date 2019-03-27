@@ -93,7 +93,7 @@ func Strict(laxValidator validator.Validator) validator.Validator {
 	}
 }
 
-func Compile(in interface{}) (validator.Validator, error) {
+func compile(in interface{}) (validator.Validator, error) {
 	switch in.(type) {
 	case validator.Map:
 		return compileMap(in.(validator.Map))
@@ -158,7 +158,7 @@ func setupWalkObserver() (walkObserver, *CompiledSchema) {
 
 // MustCompile compiles the given validation, panic-ing if that map is invalid.
 func MustCompile(in interface{}) validator.Validator {
-	compiled, err := Compile(in)
+	compiled, err := compile(in)
 	if err != nil {
 		panic(err)
 	}

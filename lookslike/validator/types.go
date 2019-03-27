@@ -1,6 +1,6 @@
 package validator
 
-// validator.Map is the type used to define schema definitions for Compile and to represent an arbitrary
+// Map is the type used to define schema definitions for Compile and to represent an arbitrary
 // map of values of any type.
 type Map map[string]interface{}
 

@@ -61,6 +61,7 @@ func SingleResult(path paths.Path, result ValueResult) *Results {
 	return r
 }
 
+// Merge combines multiple *Results sets together.
 func (r *Results) Merge(other *Results) {
 	for otherPath, valueResults := range other.Fields {
 		for _, valueResult := range valueResults {
@@ -86,6 +87,7 @@ func (r *Results) MergeUnderPrefix(prefix paths.Path, other *Results) {
 	}
 }
 
+// Record records a single path result to this instance.
 func (r *Results) Record(p paths.Path, result ValueResult) {
 	if r.Fields[p.String()] == nil {
 		r.Fields[p.String()] = []ValueResult{result}

@@ -126,6 +126,7 @@ func (ust UniqScopeTracker) IsUniqueTo(namespace string) IsDef {
 	})
 }
 
+// ScopedIsUnique returns a new scope for uniqueness checks.
 func ScopedIsUnique() UniqScopeTracker {
 	return UniqScopeTracker{}
 }
