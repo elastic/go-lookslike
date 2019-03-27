@@ -18,29 +18,31 @@
 package lookslike
 
 import (
+	"github.com/elastic/lookslike/lookslike/paths"
+	"github.com/elastic/lookslike/lookslike/results"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
 )
 
 func TestEmpty(t *testing.T) {
-	r := NewResults()
+	r := results.NewResults()
 	assert.True(t, r.Valid)
 	assert.Empty(t, r.DetailedErrors().Fields)
 	assert.Empty(t, r.Errors())
 }
 
 func TestWithError(t *testing.T) {
-	r := NewResults()
-	r.record(MustParsePath("foo"), KeyMissingVR)
-	r.record(MustParsePath("bar"), ValidVR)
+	r := results.NewResults()
+	r.Record(paths.MustParsePath("foo"), results.KeyMissingVR)
+	r.Record(paths.MustParsePath("bar"), results.ValidVR)
 
 	assert.False(t, r.Valid)
 
-	assert.Equal(t, KeyMissingVR, r.Fields["foo"][0])
-	assert.Equal(t, ValidVR, r.Fields["bar"][0])
+	assert.Equal(t, results.KeyMissingVR, r.Fields["foo"][0])
+	assert.Equal(t, results.ValidVR, r.Fields["bar"][0])
 
-	assert.Equal(t, KeyMissingVR, r.DetailedErrors().Fields["foo"][0])
+	assert.Equal(t, results.KeyMissingVR, r.DetailedErrors().Fields["foo"][0])
 	assert.NotContains(t, r.DetailedErrors().Fields, "bar")
 
 	assert.False(t, r.DetailedErrors().Valid)

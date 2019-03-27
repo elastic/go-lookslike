@@ -22,6 +22,7 @@ import (
 	"github.com/elastic/lookslike/lookslike/paths"
 	"github.com/elastic/lookslike/lookslike/results"
 	"github.com/elastic/lookslike/lookslike/validator"
+	"github.com/stretchr/testify/require"
 	"regexp"
 	"testing"
 	"time"
@@ -458,4 +459,17 @@ func TestInvalidPathIsdef(t *testing.T) {
 	})
 
 	assert.Equal(t, paths.InvalidPathString(badPath), err)
+}
+
+// This test is here, not in isdefs because it really is testing core functionality
+func TestOptional(t *testing.T) {
+	m := validator.Map{
+		"foo": "bar",
+	}
+
+	validator := MustCompile(validator.Map{
+		"non": isdefs.Optional(isdefs.IsEqual("foo")),
+	})
+
+	require.True(t, validator(m).Valid)
 }

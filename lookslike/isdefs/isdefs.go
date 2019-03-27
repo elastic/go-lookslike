@@ -137,7 +137,7 @@ func IsDeepEqual(to interface{}) IsDef {
 // via the given validator.Validator.
 func IsArrayOf(validator validator.Validator) IsDef {
 	return Is("slice", func(path paths.Path, v interface{}) *results.Results {
-		if reflect.TypeOf(v).Kind() == reflect.Slice {
+		if reflect.TypeOf(v).Kind() != reflect.Slice {
 			return results.SimpleResult(path, false, "Expected slice at given path")
 		}
 		vSlice := util.SliceToSliceOfInterfaces(v)
