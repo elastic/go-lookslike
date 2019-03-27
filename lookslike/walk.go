@@ -25,10 +25,10 @@ import (
 )
 
 type walkObserverInfo struct {
-	key     paths.PathComponent
-	value   interface{}
-	root    validator.Map
-	path    paths.Path
+	key   paths.PathComponent
+	value interface{}
+	root  validator.Map
+	path  paths.Path
 }
 
 // walkObserver functions run once per object in the tree.

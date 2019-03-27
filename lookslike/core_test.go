@@ -255,8 +255,6 @@ func TestStrictFunc(t *testing.T) {
 	assert.False(t, res.Valid)
 }
 
-
-
 func TestExistence(t *testing.T) {
 	m := validator.Map{
 		"exists": "foo",

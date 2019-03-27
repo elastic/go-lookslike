@@ -48,7 +48,7 @@ func NewResults() *Results {
 // It's a very common way for validators to return a *Results object, and is generally simpler than
 // using SingleResult.
 func SimpleResult(path paths.Path, valid bool, msg string, args ...interface{}) *Results {
-	vr :=ValueResult{valid, fmt.Sprintf(msg, args...)}
+	vr := ValueResult{valid, fmt.Sprintf(msg, args...)}
 	return SingleResult(path, vr)
 }
 
@@ -100,7 +100,7 @@ func (r *Results) Record(p paths.Path, result ValueResult) {
 // EachResult executes the given callback once per Value result.
 // The provided callback can return true to keep iterating, or false
 // to stop.
-func (r Results) EachResult(f func(paths.Path,ValueResult) bool) {
+func (r Results) EachResult(f func(paths.Path, ValueResult) bool) {
 	for p, pathResults := range r.Fields {
 		for _, result := range pathResults {
 			// We can ignore path parse errors here, those are from scalars and other
@@ -144,7 +144,7 @@ func (r Results) Errors() []error {
 
 	r.EachResult(func(path paths.Path, vr ValueResult) bool {
 		if !vr.Valid {
-			errors = append(errors,ValueResultError{path, vr})
+			errors = append(errors, ValueResultError{path, vr})
 		}
 		return true
 	})

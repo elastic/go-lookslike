@@ -29,7 +29,6 @@ import (
 	"strings"
 )
 
-
 // Compose combines multiple SchemaValidators into a single one.
 func Compose(validators ...validator.Validator) validator.Validator {
 	return func(actual interface{}) *results.Results {

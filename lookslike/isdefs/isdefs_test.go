@@ -183,7 +183,7 @@ func TestIsUnique(t *testing.T) {
 			func() *results.Results {
 				IsUnique().Check(pathFoo, "a", true)
 				return IsUnique().Check(pathFoo, "b", true)
-		},
+			},
 			true,
 		},
 		{
