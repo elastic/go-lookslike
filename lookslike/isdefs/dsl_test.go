@@ -1,13 +1,14 @@
 package isdefs
 
 import (
+	"reflect"
+	"testing"
+
 	"github.com/elastic/lookslike/lookslike/paths"
 	"github.com/elastic/lookslike/lookslike/results"
 	"github.com/elastic/lookslike/lookslike/validator"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	"reflect"
-	"testing"
 )
 
 func TestIsSliceOf(t *testing.T) {

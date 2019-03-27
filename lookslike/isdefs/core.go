@@ -2,9 +2,10 @@ package isdefs
 
 import (
 	"fmt"
+	"reflect"
+
 	"github.com/elastic/lookslike/lookslike/paths"
 	"github.com/elastic/lookslike/lookslike/results"
-	"reflect"
 )
 
 // IsEqual tests that the given object is equal to the actual object.
@@ -81,7 +82,6 @@ func RegisterEqual(fn interface{}) error {
 	return nil
 }
 
-
 // IsDeepEqual checks equality using reflect.DeepEqual.
 func IsDeepEqual(to interface{}) IsDef {
 	return Is("equals", func(path paths.Path, v interface{}) *results.Results {
@@ -95,8 +95,6 @@ func IsDeepEqual(to interface{}) IsDef {
 		)
 	})
 }
-
-
 
 // IsNil tests that a value is nil.
 var IsNil = Is("is nil", func(path paths.Path, v interface{}) *results.Results {

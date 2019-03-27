@@ -2,10 +2,11 @@ package isdefs
 
 import (
 	"fmt"
-	"github.com/elastic/lookslike/lookslike/paths"
-	"github.com/elastic/lookslike/lookslike/results"
 	"regexp"
 	"strings"
+
+	"github.com/elastic/lookslike/lookslike/paths"
+	"github.com/elastic/lookslike/lookslike/results"
 )
 
 // isStrCheck is a helper for IsDefs that must assert that the value is a string first.
@@ -86,4 +87,3 @@ func IsStringContaining(needle string) IsDef {
 		return results.ValidResult(path)
 	})
 }
-

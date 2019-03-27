@@ -1,9 +1,10 @@
 package isdefs
 
 import (
+	"time"
+
 	"github.com/elastic/lookslike/lookslike/paths"
 	"github.com/elastic/lookslike/lookslike/results"
-	"time"
 )
 
 // IsEqualToTime ensures that the actual value is the given time, regardless of zone.
@@ -21,4 +22,3 @@ func IsEqualToTime(to time.Time) IsDef {
 		return results.SimpleResult(path, false, "actual(%v) != expected(%v)", actualTime, to)
 	})
 }
-

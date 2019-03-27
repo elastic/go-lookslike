@@ -2,9 +2,10 @@ package isdefs
 
 import (
 	"fmt"
+	"time"
+
 	"github.com/elastic/lookslike/lookslike/paths"
 	"github.com/elastic/lookslike/lookslike/results"
-	"time"
 )
 
 // IsDuration tests that the given value is a duration.
@@ -18,4 +19,3 @@ var IsDuration = Is("is a duration", func(path paths.Path, v interface{}) *resul
 		fmt.Sprintf("Expected a time.duration, got '%v' which is a %T", v, v),
 	)
 })
-

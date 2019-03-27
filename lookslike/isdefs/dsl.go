@@ -2,11 +2,12 @@ package isdefs
 
 import (
 	"fmt"
+	"reflect"
+
 	"github.com/elastic/lookslike/lookslike/paths"
 	"github.com/elastic/lookslike/lookslike/results"
 	"github.com/elastic/lookslike/lookslike/util"
 	"github.com/elastic/lookslike/lookslike/validator"
-	"reflect"
 )
 
 // Is creates a named IsDef with the given Checker.
@@ -54,7 +55,6 @@ func Optional(id IsDef) IsDef {
 	id.Optional = true
 	return id
 }
-
 
 // IsSliceOf validates that the array at the given key is an array of objects all validatable
 // via the given validator.Validator.

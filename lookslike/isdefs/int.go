@@ -2,6 +2,7 @@ package isdefs
 
 import (
 	"fmt"
+
 	"github.com/elastic/lookslike/lookslike/paths"
 	"github.com/elastic/lookslike/lookslike/results"
 )
