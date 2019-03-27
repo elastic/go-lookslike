@@ -21,6 +21,7 @@ import (
 	"reflect"
 )
 
+// InterfaceToMap converts the given interface to a map[string]interface{}.
 func InterfaceToMap(o interface{}) map[string]interface{} {
 	newMap := map[string]interface{}{}
 	rv := reflect.ValueOf(o)
