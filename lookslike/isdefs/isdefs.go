@@ -15,10 +15,14 @@
 // specific language governing permissions and limitations
 // under the License.
 
-package lookslike
+package isdefs
 
 import (
 	"fmt"
+	"github.com/elastic/lookslike/lookslike/paths"
+	"github.com/elastic/lookslike/lookslike/results"
+	"github.com/elastic/lookslike/lookslike/util"
+	"github.com/elastic/lookslike/lookslike/validator"
 	"reflect"
 	"regexp"
 	"strings"
@@ -38,7 +42,7 @@ func IsEqual(to interface{}) IsDef {
 	// We know this is an isdef due to the Register check previously
 	checker := isDefFactory.Call([]reflect.Value{toV})[0].Interface().(IsDef).Checker
 
-	return Is("equals", func(path Path, v interface{}) *Results {
+	return Is("equals", func(path paths.Path, v interface{}) *results.Results {
 		return checker(path, v)
 	})
 }
@@ -101,27 +105,27 @@ func RegisterEqual(fn interface{}) error {
 
 // IsEqualToTime ensures that the actual value is the given time, regardless of zone.
 func IsEqualToTime(to time.Time) IsDef {
-	return Is("equal to time", func(path Path, v interface{}) *Results {
+	return Is("equal to time", func(path paths.Path, v interface{}) *results.Results {
 		actualTime, ok := v.(time.Time)
 		if !ok {
-			return SimpleResult(path, false, "Value %t was not a time.Time", v)
+			return results.SimpleResult(path, false, "Value %t was not a time.Time", v)
 		}
 
 		if actualTime.Equal(to) {
-			return ValidResult(path)
+			return results.ValidResult(path)
 		}
 
-		return SimpleResult(path, false, "actual(%v) != expected(%v)", actualTime, to)
+		return results.SimpleResult(path, false, "actual(%v) != expected(%v)", actualTime, to)
 	})
 }
 
 // IsDeepEqual checks equality using reflect.DeepEqual.
 func IsDeepEqual(to interface{}) IsDef {
-	return Is("equals", func(path Path, v interface{}) *Results {
+	return Is("equals", func(path paths.Path, v interface{}) *results.Results {
 		if reflect.DeepEqual(v, to) {
-			return ValidResult(path)
+			return results.ValidResult(path)
 		}
-		return SimpleResult(
+		return results.SimpleResult(
 			path,
 			false,
 			fmt.Sprintf("objects not equal: actual(%T(%v)) != expected(%T(%v))", v, v, to, to),
@@ -130,23 +134,23 @@ func IsDeepEqual(to interface{}) IsDef {
 }
 
 // IsArrayOf validates that the array at the given key is an array of objects all validatable
-// via the given Validator.
-func IsArrayOf(validator Validator) IsDef {
-	return Is("array of maps", func(path Path, v interface{}) *Results {
-		vArr, isArr := v.([]Map)
-		if !isArr {
-			return SimpleResult(path, false, "Expected array at given path")
+// via the given validator.Validator.
+func IsArrayOf(validator validator.Validator) IsDef {
+	return Is("slice", func(path paths.Path, v interface{}) *results.Results {
+		if reflect.TypeOf(v).Kind() == reflect.Slice {
+			return results.SimpleResult(path, false, "Expected slice at given path")
+		}
+		vSlice := util.SliceToSliceOfInterfaces(v)
+
+		res := results.NewResults()
+
+		for idx, curV := range vSlice {
+			var validatorRes *results.Results
+			validatorRes = validator(curV)
+			res.MergeUnderPrefix(path.ExtendSlice(idx), validatorRes)
 		}
 
-		results := NewResults()
-
-		for idx, curMap := range vArr {
-			var validatorRes *Results
-			validatorRes = validator(curMap)
-			results.MergeUnderPrefix(path.ExtendSlice(idx), validatorRes)
-		}
-
-		return results
+		return res
 	})
 }
 
@@ -159,7 +163,7 @@ func IsAny(of ...IsDef) IsDef {
 	}
 	isName := fmt.Sprintf("either %#v", names)
 
-	return Is(isName, func(path Path, v interface{}) *Results {
+	return Is(isName, func(path paths.Path, v interface{}) *results.Results {
 		for _, def := range of {
 			vr := def.Check(path, v, true)
 			if vr.Valid {
@@ -167,7 +171,7 @@ func IsAny(of ...IsDef) IsDef {
 			}
 		}
 
-		return SimpleResult(
+		return results.SimpleResult(
 			path,
 			false,
 			fmt.Sprintf("Value was none of %#v, actual value was %#v", names, v),
@@ -176,7 +180,7 @@ func IsAny(of ...IsDef) IsDef {
 }
 
 // IsUnique instances are used in multiple spots, flagging a value as being in error if it's seen across invocations.
-// To use it, assign IsUnique to a variable, then use that variable multiple times in a Map.
+// To use it, assign IsUnique to a variable, then use that variable multiple times in a validator.Map.
 func IsUnique() IsDef {
 	return ScopedIsUnique().IsUniqueTo("")
 }
@@ -186,16 +190,16 @@ type UniqScopeTracker map[interface{}]string
 
 // IsUniqueTo validates that the given value is only ever seen within a single namespace.
 func (ust UniqScopeTracker) IsUniqueTo(namespace string) IsDef {
-	return Is("unique", func(path Path, v interface{}) *Results {
+	return Is("unique", func(path paths.Path, v interface{}) *results.Results {
 		for trackerK, trackerNs := range ust {
 			hasNamespace := len(namespace) > 0
 			if reflect.DeepEqual(trackerK, v) && (!hasNamespace || namespace != trackerNs) {
-				return SimpleResult(path, false, "Value '%v' is repeated", v)
+				return results.SimpleResult(path, false, "Value '%v' is repeated", v)
 			}
 		}
 
 		ust[v] = namespace
-		return ValidResult(path)
+		return results.ValidResult(path)
 	})
 }
 
@@ -204,11 +208,11 @@ func ScopedIsUnique() UniqScopeTracker {
 }
 
 // isStrCheck is a helper for IsDefs that must assert that the value is a string first.
-func isStrCheck(path Path, v interface{}) (str string, errorResults *Results) {
+func isStrCheck(path paths.Path, v interface{}) (str string, errorResults *results.Results) {
 	strV, ok := v.(string)
 
 	if !ok {
-		return "", SimpleResult(
+		return "", results.SimpleResult(
 			path,
 			false,
 			fmt.Sprintf("Unable to convert '%v' to string", v),
@@ -219,75 +223,75 @@ func isStrCheck(path Path, v interface{}) (str string, errorResults *Results) {
 }
 
 // IsString checks that the given value is a string.
-var IsString = Is("is a string", func(path Path, v interface{}) *Results {
+var IsString = Is("is a string", func(path paths.Path, v interface{}) *results.Results {
 	_, errorResults := isStrCheck(path, v)
 	if errorResults != nil {
 		return errorResults
 	}
 
-	return ValidResult(path)
+	return results.ValidResult(path)
 })
 
 // IsNonEmptyString checks that the given value is a string and has a length > 1.
-var IsNonEmptyString = Is("is a non-empty string", func(path Path, v interface{}) *Results {
+var IsNonEmptyString = Is("is a non-empty string", func(path paths.Path, v interface{}) *results.Results {
 	strV, errorResults := isStrCheck(path, v)
 	if errorResults != nil {
 		return errorResults
 	}
 
 	if len(strV) == 0 {
-		return SimpleResult(path, false, "String '%s' should not be empty", strV)
+		return results.SimpleResult(path, false, "String '%s' should not be empty", strV)
 	}
 
-	return ValidResult(path)
+	return results.ValidResult(path)
 })
 
 // IsStringMatching checks whether a value matches the given regexp.
 func IsStringMatching(regexp *regexp.Regexp) IsDef {
-	return Is("is string matching regexp", func(path Path, v interface{}) *Results {
+	return Is("is string matching regexp", func(path paths.Path, v interface{}) *results.Results {
 		strV, errorResults := isStrCheck(path, v)
 		if errorResults != nil {
 			return errorResults
 		}
 
 		if !regexp.MatchString(strV) {
-			return SimpleResult(
+			return results.SimpleResult(
 				path,
 				false,
 				fmt.Sprintf("String '%s' did not match regexp %s", strV, regexp.String()),
 			)
 		}
 
-		return ValidResult(path)
+		return results.ValidResult(path)
 	})
 }
 
 // IsStringContaining validates that the the actual value contains the specified substring.
 func IsStringContaining(needle string) IsDef {
-	return Is("is string containing", func(path Path, v interface{}) *Results {
+	return Is("is string containing", func(path paths.Path, v interface{}) *results.Results {
 		strV, errorResults := isStrCheck(path, v)
 		if errorResults != nil {
 			return errorResults
 		}
 
 		if !strings.Contains(strV, needle) {
-			return SimpleResult(
+			return results.SimpleResult(
 				path,
 				false,
 				fmt.Sprintf("String '%s' did not contain substring '%s'", strV, needle),
 			)
 		}
 
-		return ValidResult(path)
+		return results.ValidResult(path)
 	})
 }
 
 // IsDuration tests that the given value is a duration.
-var IsDuration = Is("is a duration", func(path Path, v interface{}) *Results {
+var IsDuration = Is("is a duration", func(path paths.Path, v interface{}) *results.Results {
 	if _, ok := v.(time.Duration); ok {
-		return ValidResult(path)
+		return results.ValidResult(path)
 	}
-	return SimpleResult(
+	return results.SimpleResult(
 		path,
 		false,
 		fmt.Sprintf("Expected a time.duration, got '%v' which is a %T", v, v),
@@ -295,11 +299,11 @@ var IsDuration = Is("is a duration", func(path Path, v interface{}) *Results {
 })
 
 // IsNil tests that a value is nil.
-var IsNil = Is("is nil", func(path Path, v interface{}) *Results {
+var IsNil = Is("is nil", func(path paths.Path, v interface{}) *results.Results {
 	if v == nil {
-		return ValidResult(path)
+		return results.ValidResult(path)
 	}
-	return SimpleResult(
+	return results.SimpleResult(
 		path,
 		false,
 		fmt.Sprintf("Value %v is not nil", v),
@@ -307,18 +311,18 @@ var IsNil = Is("is nil", func(path Path, v interface{}) *Results {
 })
 
 func intGtChecker(than int) ValueValidator {
-	return func(path Path, v interface{}) *Results {
+	return func(path paths.Path, v interface{}) *results.Results {
 		n, ok := v.(int)
 		if !ok {
 			msg := fmt.Sprintf("%v is a %T, but was expecting an int!", v, v)
-			return SimpleResult(path, false, msg)
+			return results.SimpleResult(path, false, msg)
 		}
 
 		if n > than {
-			return ValidResult(path)
+			return results.ValidResult(path)
 		}
 
-		return SimpleResult(
+		return results.SimpleResult(
 			path,
 			false,
 			fmt.Sprintf("%v is not greater than %v", n, than),

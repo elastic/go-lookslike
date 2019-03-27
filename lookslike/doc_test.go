@@ -19,25 +19,29 @@ package lookslike
 
 import (
 	"fmt"
+	"github.com/elastic/lookslike/lookslike/isdefs"
+	"github.com/elastic/lookslike/lookslike/paths"
+	"github.com/elastic/lookslike/lookslike/results"
+	"github.com/elastic/lookslike/lookslike/validator"
 	"strings"
 )
 
 func Example() {
 	// Let's say we want to validate this map
-	data := Map{"foo": "bar", "baz": "bot", "count": 1}
+	data := validator.Map{"foo": "bar", "baz": "bot", "count": 1}
 
 	// We can validate the data by creating a lookslike.Validator
-	// Validators are functions created by compiling the special lookslike.Map
+	// validator.Validators are functions created by compiling the special lookslike.validator.Map
 	// type. This is a map[string]interface{} that can be compiled
 	// into a series of checks.
 	//
-	// Literal values in a lookslike.Map are checked for equality.
+	// Literal values in a lookslike.validator.Map are checked for equality.
 	// More complex checks can be done using values of the lookslike.IsDef
 	// type. In this case, we're using an IsDef to see if the "foo" key
 	// contains the string "a", and we're using a literal to Check that the
 	// "baz" key contains the exact value "bot".
-	validator := MustCompile(Map{
-		"foo": IsStringContaining("a"),
+	validator := MustCompile(validator.Map{
+		"foo": isdefs.IsStringContaining("a"),
 		"baz": "bot",
 	})
 
@@ -55,7 +59,7 @@ func Example() {
 	// Results.Errors() returns one error per failed match
 	fmt.Printf("There were %d errors\n", len(results.Errors()))
 
-	// Results.Fields is a map of paths defined in the input lookslike.Map to the result of their validation
+	// Results.Fields is a map of paths defined in the input lookslike.validator.Map to the result of their validation
 	// This is useful if you need more control
 	fmt.Printf("Over %d fields\n", len(results.Fields))
 
@@ -83,7 +87,7 @@ func ExampleCompose() {
 	// Composition is useful when you need to share common validation logic between validators.
 	// Let's imagine that we want to validate maps describing pets.
 
-	pets := []Map{
+	pets := []validator.Map{
 		{"Name": "rover", "barks": "often", "fur_length": "long"},
 		{"Name": "lucky", "barks": "rarely", "fur_length": "short"},
 		{"Name": "pounce", "meows": "often", "fur_length": "short"},
@@ -96,19 +100,19 @@ func ExampleCompose() {
 	// We'll start by creating a composed IsDef using the IsAny composition, which creates a new IsDef that is
 	// a logical 'or' of its IsDef arguments
 
-	isFrequency := IsAny(IsEqual("often"), IsEqual("rarely"))
+	isFrequency := isdefs.IsAny(isdefs.IsEqual("often"), isdefs.IsEqual("rarely"))
 
-	petValidator := MustCompile(Map{
-		"Name":       IsNonEmptyString,
-		"fur_length": IsAny(IsEqual("long"), IsEqual("short")),
+	petValidator := MustCompile(validator.Map{
+		"Name":       isdefs.IsNonEmptyString,
+		"fur_length": isdefs.IsAny(isdefs.IsEqual("long"), isdefs.IsEqual("short")),
 	})
 	dogValidator := Compose(
 		petValidator,
-		MustCompile(Map{"barks": isFrequency}),
+		MustCompile(validator.Map{"barks": isFrequency}),
 	)
 	catValidator := Compose(
 		petValidator,
-		MustCompile(Map{"meows": isFrequency}),
+		MustCompile(validator.Map{"meows": isFrequency}),
 	)
 
 	for _, pet := range pets {
@@ -129,41 +133,41 @@ func ExampleCompose() {
 }
 
 func ExampleOptional() {
-	dataNoError := Map{"foo": "bar"}
-	dataError := Map{"foo": "bar", "error": true}
+	dataNoError := validator.Map{"foo": "bar"}
+	dataError := validator.Map{"foo": "bar", "error": true}
 
-	validator := MustCompile(Map{"foo": "bar", "error": Optional(IsEqual(true))})
+	validator := MustCompile(validator.Map{"foo": "bar", "error": isdefs.Optional(isdefs.IsEqual(true))})
 
 	// Both inputs pass
 	fmt.Printf("Validator classifies both maps as true: %t", validator(dataNoError).Valid && validator(dataError).Valid)
 
 	// Output:
-	// Validator classifies both maps as true: true
+	// validator.Validator classifies both maps as true: true
 }
 
 func ExampleIs() {
 	// More advanced validations can be used with built-in and custom functions.
 	// These are represented with the IfDef type
 
-	data := Map{"foo": "bar", "count": 1}
+	data := validator.Map{"foo": "bar", "count": 1}
 
 	// Values can also be tested programatically if a lookslike.IsDef is used as a value
 	// Here we'll define a custom IsDef using the lookslike DSL, then validate it.
 	// The Is() function is the preferred way to costruct IsDef objects.
-	startsWithB := Is("starts with b", func(path Path, v interface{}) *Results {
+	startsWithB := isdefs.Is("starts with b", func(path paths.Path, v interface{}) *results.Results {
 		vStr, ok := v.(string)
 		if !ok {
-			return SimpleResult(path, false, "Expected a string, got a %t", v)
+			return results.SimpleResult(path, false, "Expected a string, got a %t", v)
 		}
 
 		if strings.HasPrefix(vStr, "b") {
-			return ValidResult(path)
+			return results.ValidResult(path)
 		}
 
-		return SimpleResult(path, false, "Expected string to start with b, got %v", vStr)
+		return results.SimpleResult(path, false, "Expected string to start with b, got %v", vStr)
 	})
 
-	funcValidator := MustCompile(Map{"foo": startsWithB})
+	funcValidator := MustCompile(validator.Map{"foo": startsWithB})
 
 	funcValidatorResult := funcValidator(data)
 
@@ -174,12 +178,12 @@ func ExampleIs() {
 }
 
 func ExampleMap() {
-	v := MustCompile(Map{
-		"foo": IsStringContaining("a"),
+	v := MustCompile(validator.Map{
+		"foo": isdefs.IsStringContaining("a"),
 		"baz": "bot",
 	})
 
-	data := Map{
+	data := validator.Map{
 		"foo": "bar",
 		"baz": "bot",
 	}
@@ -191,11 +195,11 @@ func ExampleMap() {
 }
 
 func ExampleSlice() {
-	v := MustCompile(Map{
-		"foo": Slice{"foo", IsNonEmptyString},
+	v := MustCompile(validator.Map{
+		"foo": validator.Slice{"foo", isdefs.IsNonEmptyString},
 	})
 
-	data := Map{"foo": []string{"foo", "something"}}
+	data := validator.Map{"foo": []string{"foo", "something"}}
 
 	fmt.Printf("Result is %t", v(data).Valid)
 

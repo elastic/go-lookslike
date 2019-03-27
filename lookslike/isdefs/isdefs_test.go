@@ -15,9 +15,13 @@
 // specific language governing permissions and limitations
 // under the License.
 
-package lookslike
+package isdefs
 
 import (
+	"github.com/elastic/lookslike/lookslike"
+	"github.com/elastic/lookslike/lookslike/paths"
+	"github.com/elastic/lookslike/lookslike/results"
+	"github.com/elastic/lookslike/lookslike/validator"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"regexp"
@@ -25,8 +29,8 @@ import (
 	"time"
 )
 
-func assertIsDefValid(t *testing.T, id IsDef, value interface{}) *Results {
-	res := id.Check(MustParsePath("p"), value, true)
+func assertIsDefValid(t *testing.T, id IsDef, value interface{}) *results.Results {
+	res := id.Check(paths.MustParsePath("p"), value, true)
 
 	if !res.Valid {
 		assert.Fail(
@@ -38,8 +42,8 @@ func assertIsDefValid(t *testing.T, id IsDef, value interface{}) *Results {
 	return res
 }
 
-func assertIsDefInvalid(t *testing.T, id IsDef, value interface{}) *Results {
-	res := id.Check(MustParsePath("p"), value, true)
+func assertIsDefInvalid(t *testing.T, id IsDef, value interface{}) *results.Results {
+	res := id.Check(paths.MustParsePath("p"), value, true)
 
 	if res.Valid {
 		assert.Fail(
@@ -54,12 +58,12 @@ func assertIsDefInvalid(t *testing.T, id IsDef, value interface{}) *Results {
 }
 
 func TestIsArrayOf(t *testing.T) {
-	validator := MustCompile(Map{"foo": "bar"})
+	v := lookslike.MustCompile(validator.Map{"foo": "bar"})
 
-	id := IsArrayOf(validator)
+	id := IsArrayOf(v)
 
-	goodMap := Map{"foo": "bar"}
-	goodMapArr := []Map{goodMap, goodMap}
+	goodMap := validator.Map{"foo": "bar"}
+	goodMapArr := []validator.Map{goodMap, goodMap}
 
 	goodRes := assertIsDefValid(t, id, goodMapArr)
 	goodFields := goodRes.Fields
@@ -67,8 +71,8 @@ func TestIsArrayOf(t *testing.T) {
 	assert.Contains(t, goodFields, "p.[0].foo")
 	assert.Contains(t, goodFields, "p.[1].foo")
 
-	badMap := Map{"foo": "bot"}
-	badMapArr := []Map{badMap}
+	badMap := validator.Map{"foo": "bot"}
+	badMapArr := []validator.Map{badMap}
 
 	badRes := assertIsDefInvalid(t, id, badMapArr)
 	badFields := badRes.Fields
@@ -154,42 +158,42 @@ func TestIsNil(t *testing.T) {
 func TestIsUnique(t *testing.T) {
 	tests := []struct {
 		name      string
-		validator func() Validator
-		data      Map
+		validator func() validator.Validator
+		data      validator.Map
 		isValid   bool
 	}{
 		{
 			"IsUnique find dupes",
-			func() Validator {
+			func() validator.Validator {
 				v := IsUnique()
-				return MustCompile(Map{"a": v, "b": v})
+				return lookslike.MustCompile(validator.Map{"a": v, "b": v})
 			},
-			Map{"a": 1, "b": 1},
+			validator.Map{"a": 1, "b": 1},
 			false,
 		},
 		{
 			"IsUnique separate instances don't care about dupes",
-			func() Validator { return MustCompile(Map{"a": IsUnique(), "b": IsUnique()}) },
-			Map{"a": 1, "b": 1},
+			func() validator.Validator { return lookslike.MustCompile(validator.Map{"a": IsUnique(), "b": IsUnique()}) },
+			validator.Map{"a": 1, "b": 1},
 			true,
 		},
 		{
 			"IsUniqueTo duplicates across namespaces fail",
-			func() Validator {
+			func() validator.Validator {
 				s := ScopedIsUnique()
-				return MustCompile(Map{"a": s.IsUniqueTo("test"), "b": s.IsUniqueTo("test2")})
+				return lookslike.MustCompile(validator.Map{"a": s.IsUniqueTo("test"), "b": s.IsUniqueTo("test2")})
 			},
-			Map{"a": 1, "b": 1},
+			validator.Map{"a": 1, "b": 1},
 			false,
 		},
 
 		{
 			"IsUniqueTo duplicates within a namespace succeeds",
-			func() Validator {
+			func() validator.Validator {
 				s := ScopedIsUnique()
-				return MustCompile(Map{"a": s.IsUniqueTo("test"), "b": s.IsUniqueTo("test")})
+				return lookslike.MustCompile(validator.Map{"a": s.IsUniqueTo("test"), "b": s.IsUniqueTo("test")})
 			},
-			Map{"a": 1, "b": 1},
+			validator.Map{"a": 1, "b": 1},
 			true,
 		},
 	}

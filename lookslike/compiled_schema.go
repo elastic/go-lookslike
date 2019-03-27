@@ -17,26 +17,32 @@
 
 package lookslike
 
+import (
+	"github.com/elastic/lookslike/lookslike/isdefs"
+	"github.com/elastic/lookslike/lookslike/paths"
+	"github.com/elastic/lookslike/lookslike/results"
+)
+
 type flatValidator struct {
-	path  Path
-	isDef IsDef
+	path  paths.Path
+	isDef isdefs.IsDef
 }
 
-// CompiledSchema represents a compiled definition for driving a Validator.
+// CompiledSchema represents a compiled definition for driving a validator.Validator.
 type CompiledSchema []flatValidator
 
 // Check executes the the checks within the CompiledSchema
-func (cs CompiledSchema) Check(actual interface{}) *Results {
-	results := NewResults()
+func (cs CompiledSchema) Check(actual interface{}) *results.Results {
+	res := results.NewResults()
 	for _, pv := range cs {
 		actualV, actualKeyExists := pv.path.GetFrom(actual)
 
 		if !pv.isDef.Optional || pv.isDef.Optional && actualKeyExists {
-			var checkRes *Results
+			var checkRes *results.Results
 			checkRes = pv.isDef.Check(pv.path, actualV, actualKeyExists)
-			results.merge(checkRes)
+			res.Merge(checkRes)
 		}
 	}
 
-	return results
+	return res
 }

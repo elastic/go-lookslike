@@ -15,7 +15,7 @@
 // specific language governing permissions and limitations
 // under the License.
 
-package lookslike
+package paths
 
 import (
 	"reflect"
@@ -25,7 +25,7 @@ import (
 func TestPathComponentType_String(t *testing.T) {
 	tests := []struct {
 		name string
-		pct  pathComponentType
+		pct  PathComponentType
 		want string
 	}{
 		{
@@ -43,7 +43,7 @@ func TestPathComponentType_String(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			if got := tt.pct.String(); got != tt.want {
-				t.Errorf("pathComponentType.String() = %v, want %v", got, tt.want)
+				t.Errorf("PathComponentType.String() = %v, want %v", got, tt.want)
 			}
 		})
 	}
@@ -51,7 +51,7 @@ func TestPathComponentType_String(t *testing.T) {
 
 func TestPathComponent_String(t *testing.T) {
 	type fields struct {
-		Type  pathComponentType
+		Type  PathComponentType
 		Key   string
 		Index int
 	}
@@ -61,7 +61,7 @@ func TestPathComponent_String(t *testing.T) {
 		want   string
 	}{
 		{
-			"Map key should return a literal",
+			"validator.Map key should return a literal",
 			fields{pcMapKey, "foo", 0},
 			"foo",
 		},
@@ -73,13 +73,13 @@ func TestPathComponent_String(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			pc := pathComponent{
+			pc := PathComponent{
 				Type:  tt.fields.Type,
 				Key:   tt.fields.Key,
 				Index: tt.fields.Index,
 			}
 			if got := pc.String(); got != tt.want {
-				t.Errorf("pathComponent.String() = %v, want %v", got, tt.want)
+				t.Errorf("PathComponent.String() = %v, want %v", got, tt.want)
 			}
 		})
 	}
@@ -99,13 +99,13 @@ func TestPath_ExtendSlice(t *testing.T) {
 			"Extending an empty slice",
 			Path{},
 			args{123},
-			Path{pathComponent{pcSliceIdx, "", 123}},
+			Path{PathComponent{pcSliceIdx, "", 123}},
 		},
 		{
 			"Extending a non-empty slice",
-			Path{pathComponent{pcMapKey, "foo", -1}},
+			Path{PathComponent{pcMapKey, "foo", -1}},
 			args{123},
-			Path{pathComponent{pcMapKey, "foo", -1}, pathComponent{pcSliceIdx, "", 123}},
+			Path{PathComponent{pcMapKey, "foo", -1}, PathComponent{pcSliceIdx, "", 123}},
 		},
 	}
 	for _, tt := range tests {
@@ -131,13 +131,13 @@ func TestPath_ExtendMap(t *testing.T) {
 			"Extending an empty slice",
 			Path{},
 			args{"foo"},
-			Path{pathComponent{pcMapKey, "foo", -1}},
+			Path{PathComponent{pcMapKey, "foo", -1}},
 		},
 		{
 			"Extending a non-empty slice",
 			Path{}.ExtendMap("foo"),
 			args{"bar"},
-			Path{pathComponent{pcMapKey, "foo", -1}, pathComponent{pcMapKey, "bar", -1}},
+			Path{PathComponent{pcMapKey, "foo", -1}, PathComponent{pcMapKey, "bar", -1}},
 		},
 	}
 	for _, tt := range tests {
@@ -207,7 +207,7 @@ func TestPath_Last(t *testing.T) {
 	tests := []struct {
 		name string
 		p    Path
-		want *pathComponent
+		want *PathComponent
 	}{
 		{
 			"empty Path",
@@ -217,12 +217,12 @@ func TestPath_Last(t *testing.T) {
 		{
 			"one element",
 			Path{}.ExtendMap("foo"),
-			&pathComponent{pcMapKey, "foo", -1},
+			&PathComponent{pcMapKey, "foo", -1},
 		},
 		{
 			"many elements",
 			Path{}.ExtendMap("foo").ExtendMap("bar").ExtendSlice(123),
-			&pathComponent{pcSliceIdx, "", 123},
+			&PathComponent{pcSliceIdx, "", 123},
 		},
 	}
 	for _, tt := range tests {
@@ -240,35 +240,35 @@ func TestPath_GetFrom(t *testing.T) {
 	tests := []struct {
 		name       string
 		p          Path
-		arg        Map
+		arg        map[string]interface{}
 		wantValue  interface{}
 		wantExists bool
 	}{
 		{
 			"simple present",
 			fooPath,
-			Map{"foo": "bar"},
+			map[string]interface{}{"foo": "bar"},
 			"bar",
 			true,
 		},
 		{
 			"simple missing",
 			fooPath,
-			Map{},
+			map[string]interface{}{},
 			nil,
 			false,
 		},
 		{
 			"complex present",
 			complexPath,
-			Map{"foo": []interface{}{Map{"bar": []string{"bad", "good"}}}},
+			map[string]interface{}{"foo": []interface{}{map[string]interface{}{"bar": []string{"bad", "good"}}}},
 			"good",
 			true,
 		},
 		{
 			"complex missing",
 			complexPath,
-			Map{},
+			map[string]interface{}{},
 			nil,
 			false,
 		},
