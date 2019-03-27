@@ -63,7 +63,7 @@ func IsSliceOf(validator validator.Validator) IsDef {
 		if reflect.TypeOf(v).Kind() != reflect.Slice {
 			return results.SimpleResult(path, false, "Expected slice at given path")
 		}
-		vSlice := util.SliceToSliceOfInterfaces(v)
+		vSlice := util.InterfaceToSliceOfInterfaces(v)
 
 		res := results.NewResults()
 

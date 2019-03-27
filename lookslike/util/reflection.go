@@ -39,7 +39,14 @@ func InterfaceToMap(o interface{}) map[string]interface{} {
 	return newMap
 }
 
-func SliceToSliceOfInterfaces(o interface{}) []interface{} {
+// InterfaceToSliceOfInterfaces coerces the given interface into a slice of []interface{}.
+// If the given interface is already []interface{} lets it pass through. If it's another
+// slice type it converts all values to interface{}.
+func InterfaceToSliceOfInterfaces(o interface{}) []interface{} {
+	if reflect.TypeOf(o).Kind() != reflect.Slice {
+		o = []interface{}{o}
+	}
+
 	rv := reflect.ValueOf(o)
 	converted := make([]interface{}, rv.Len())
 	for i := 0; i < rv.Len(); i++ {

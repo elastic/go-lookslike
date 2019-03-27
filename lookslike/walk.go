@@ -93,7 +93,7 @@ func walkFull(o interface{}, root validator.Map, path paths.Path, expandPaths bo
 			return err
 		}
 	case reflect.Slice:
-		converted := util.SliceToSliceOfInterfaces(o)
+		converted := util.InterfaceToSliceOfInterfaces(o)
 
 		for idx, v := range converted {
 			newPath := path.ExtendSlice(idx)

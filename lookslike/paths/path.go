@@ -84,7 +84,7 @@ func (p Path) ExtendMap(key string) Path {
 	)
 }
 
-// Extends lengthens the given path with the given component.
+// Extend lengthens the given path with the given component.
 func (p Path) Extend(pc PathComponent) Path {
 	out := make(Path, len(p)+1)
 	copy(out, p)
@@ -128,7 +128,7 @@ func (p Path) GetFrom(m interface{}) (value interface{}, exists bool) {
 			converted := util.InterfaceToMap(value)
 			value, exists = converted[pc.Key]
 		case reflect.Slice:
-			converted := util.SliceToSliceOfInterfaces(value)
+			converted := util.InterfaceToSliceOfInterfaces(value)
 			if pc.Index < len(converted) {
 				exists = true
 				value = converted[pc.Index]
