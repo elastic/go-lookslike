@@ -8,5 +8,5 @@ type Map map[string]interface{}
 // a validator.Map as a value, and it would be able to match against any type of non-empty slice.
 type Slice []interface{}
 
-// Catchall type for things that aren't assertable to either validator.Map or Slice.
+// Scalar is a catchall type for things that aren't assertable to either validator.Map or Slice.
 type Scalar interface{}
