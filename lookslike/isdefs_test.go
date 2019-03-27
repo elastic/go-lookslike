@@ -25,9 +25,8 @@ import (
 	"time"
 )
 
-
 func assertIsDefValid(t *testing.T, id IsDef, value interface{}) *Results {
-	res := id.Check( MustParsePath("p"), value, true)
+	res := id.Check(MustParsePath("p"), value, true)
 
 	if !res.Valid {
 		assert.Fail(
@@ -40,7 +39,7 @@ func assertIsDefValid(t *testing.T, id IsDef, value interface{}) *Results {
 }
 
 func assertIsDefInvalid(t *testing.T, id IsDef, value interface{}) *Results {
-	res := id.Check( MustParsePath("p"), value, true)
+	res := id.Check(MustParsePath("p"), value, true)
 
 	if res.Valid {
 		assert.Fail(

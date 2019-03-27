@@ -58,10 +58,10 @@ func walkSlice(s Slice, expandPaths bool, wo walkObserver) error {
 
 func walkScalar(s Scalar, expandPaths bool, wo walkObserver) error {
 	return wo(walkObserverInfo{
-		value: s,
-		key: pathComponent{},
+		value:   s,
+		key:     pathComponent{},
 		rootMap: Map{},
-		path: Path{},
+		path:    Path{},
 	})
 }
 
