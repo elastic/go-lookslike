@@ -18,10 +18,11 @@
 package lookslike
 
 import (
+	"reflect"
+
 	"github.com/elastic/lookslike/lookslike/paths"
 	"github.com/elastic/lookslike/lookslike/util"
 	"github.com/elastic/lookslike/lookslike/validator"
-	"reflect"
 )
 
 type walkObserverInfo struct {

@@ -19,6 +19,7 @@ package results
 
 import (
 	"fmt"
+
 	"github.com/elastic/lookslike/lookslike/paths"
 )
 

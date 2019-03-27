@@ -18,15 +18,16 @@
 package isdefs
 
 import (
+	"reflect"
+	"regexp"
+	"testing"
+	"time"
+
 	"github.com/elastic/lookslike/lookslike/paths"
 	"github.com/elastic/lookslike/lookslike/results"
 	"github.com/elastic/lookslike/lookslike/validator"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	"reflect"
-	"regexp"
-	"testing"
-	"time"
 )
 
 func assertIsDefValid(t *testing.T, id IsDef, value interface{}) *results.Results {

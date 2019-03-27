@@ -18,9 +18,10 @@
 package lookslike
 
 import (
+	"testing"
+
 	"github.com/elastic/lookslike/lookslike/paths"
 	"github.com/elastic/lookslike/lookslike/results"
-	"testing"
 
 	"github.com/stretchr/testify/assert"
 )

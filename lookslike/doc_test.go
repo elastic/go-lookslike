@@ -19,11 +19,12 @@ package lookslike
 
 import (
 	"fmt"
+	"strings"
+
 	"github.com/elastic/lookslike/lookslike/isdefs"
 	"github.com/elastic/lookslike/lookslike/paths"
 	"github.com/elastic/lookslike/lookslike/results"
 	"github.com/elastic/lookslike/lookslike/validator"
-	"strings"
 )
 
 func Example() {

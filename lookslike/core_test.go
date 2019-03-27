@@ -18,14 +18,15 @@
 package lookslike
 
 import (
+	"regexp"
+	"testing"
+	"time"
+
 	"github.com/elastic/lookslike/lookslike/isdefs"
 	"github.com/elastic/lookslike/lookslike/paths"
 	"github.com/elastic/lookslike/lookslike/results"
 	"github.com/elastic/lookslike/lookslike/validator"
 	"github.com/stretchr/testify/require"
-	"regexp"
-	"testing"
-	"time"
 
 	"github.com/stretchr/testify/assert"
 )

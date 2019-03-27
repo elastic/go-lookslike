@@ -20,13 +20,14 @@ package lookslike
 import (
 	"errors"
 	"fmt"
+	"reflect"
+	"sort"
+	"strings"
+
 	"github.com/elastic/lookslike/lookslike/isdefs"
 	"github.com/elastic/lookslike/lookslike/paths"
 	"github.com/elastic/lookslike/lookslike/results"
 	"github.com/elastic/lookslike/lookslike/validator"
-	"reflect"
-	"sort"
-	"strings"
 )
 
 // Compose combines multiple SchemaValidators into a single one.

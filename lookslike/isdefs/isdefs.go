@@ -19,14 +19,15 @@ package isdefs
 
 import (
 	"fmt"
-	"github.com/elastic/lookslike/lookslike/paths"
-	"github.com/elastic/lookslike/lookslike/results"
-	"github.com/elastic/lookslike/lookslike/util"
-	"github.com/elastic/lookslike/lookslike/validator"
 	"reflect"
 	"regexp"
 	"strings"
 	"time"
+
+	"github.com/elastic/lookslike/lookslike/paths"
+	"github.com/elastic/lookslike/lookslike/results"
+	"github.com/elastic/lookslike/lookslike/util"
+	"github.com/elastic/lookslike/lookslike/validator"
 )
 
 // IsEqual tests that the given object is equal to the actual object.

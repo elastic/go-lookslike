@@ -19,11 +19,12 @@ package paths
 
 import (
 	"fmt"
-	"github.com/elastic/lookslike/lookslike/util"
 	"reflect"
 	"regexp"
 	"strconv"
 	"strings"
+
+	"github.com/elastic/lookslike/lookslike/util"
 )
 
 // pathComponentType indicates the type of PathComponent.
