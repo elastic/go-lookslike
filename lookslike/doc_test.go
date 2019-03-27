@@ -142,7 +142,7 @@ func ExampleOptional() {
 	fmt.Printf("Validator classifies both maps as true: %t", validator(dataNoError).Valid && validator(dataError).Valid)
 
 	// Output:
-	// validator.Validator classifies both maps as true: true
+	// Validator classifies both maps as true: true
 }
 
 func ExampleIs() {

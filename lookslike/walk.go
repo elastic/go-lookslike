@@ -87,7 +87,7 @@ func walkFull(o interface{}, root validator.Map, path paths.Path, expandPaths bo
 	switch reflect.TypeOf(o).Kind() {
 	case reflect.Map:
 		converted := util.InterfaceToMap(o)
-		err := walkFull(converted, root, path, expandPaths, wo)
+		err := walkFullMap(converted, root, path, expandPaths, wo)
 		if err != nil {
 			return err
 		}
