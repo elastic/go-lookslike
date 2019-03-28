@@ -61,7 +61,7 @@ func TestPathComponent_String(t *testing.T) {
 		want   string
 	}{
 		{
-			"validator.Map key should return a literal",
+			"map[string]interface{} key should return a literal",
 			fields{pcMapKey, "foo", 0},
 			"foo",
 		},

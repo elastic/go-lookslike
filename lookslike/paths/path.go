@@ -35,8 +35,8 @@ const (
 	pcMapKey PathComponentType = 1 + iota
 	// pcSliceIdx is the Type for slice indices.
 	pcSliceIdx
-	//
-	pcScalar
+	// pcInterface is the type for all other values
+	pcInterface
 )
 
 func (pct PathComponentType) String() string {
@@ -44,7 +44,7 @@ func (pct PathComponentType) String() string {
 		return "map"
 	} else if pct == pcSliceIdx {
 		return "slice"
-	} else if pct == pcScalar {
+	} else if pct == pcInterface {
 		return "scalar"
 	} else {
 		// This should never happen, but we don't want to return an

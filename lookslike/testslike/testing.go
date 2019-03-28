@@ -28,7 +28,7 @@ import (
 )
 
 // Test takes the output from a validator.Validator invocation and runs test assertions on the result.
-// If you are using this library for testing you will probably want to run Test(t, Compile(validator.Map{...}), actual) as a pattern.
+// If you are using this library for testing you will probably want to run Test(t, Compile(map[string]interface{}{...}), actual) as a pattern.
 func Test(t *testing.T, validator validator.Validator, value interface{}) *results.Results {
 	r := validator(value)
 

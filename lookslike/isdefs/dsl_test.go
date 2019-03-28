@@ -6,13 +6,12 @@ import (
 
 	"github.com/elastic/lookslike/lookslike/paths"
 	"github.com/elastic/lookslike/lookslike/results"
-	"github.com/elastic/lookslike/lookslike/validator"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
 func TestIsSliceOf(t *testing.T) {
-	goodMap := validator.Map{"foo": "bar"}
+	goodMap := map[string]interface{}{"foo": "bar"}
 
 	isFooBarMap := IsSliceOf(func(i interface{}) *results.Results {
 		if reflect.DeepEqual(i, goodMap) {
@@ -22,7 +21,7 @@ func TestIsSliceOf(t *testing.T) {
 		return results.SimpleResult(paths.MustParsePath("foo"), false, "did not match")
 	})
 
-	goodMapArr := []validator.Map{goodMap, goodMap}
+	goodMapArr := []map[string]interface{}{goodMap, goodMap}
 
 	goodRes := assertIsDefValid(t, isFooBarMap, goodMapArr)
 	goodFields := goodRes.Fields
@@ -30,8 +29,8 @@ func TestIsSliceOf(t *testing.T) {
 	assert.Contains(t, goodFields, "p.[0].foo")
 	assert.Contains(t, goodFields, "p.[1].foo")
 
-	badMap := validator.Map{"foo": "bot"}
-	badMapArr := []validator.Map{badMap}
+	badMap := map[string]interface{}{"foo": "bot"}
+	badMapArr := []map[string]interface{}{badMap}
 
 	badRes := assertIsDefInvalid(t, isFooBarMap, badMapArr)
 	badFields := badRes.Fields

@@ -95,19 +95,19 @@ func Strict(laxValidator validator.Validator) validator.Validator {
 
 func compile(in interface{}) (validator.Validator, error) {
 	switch in.(type) {
-	case validator.Map:
-		return compileMap(in.(validator.Map))
-	case validator.Slice:
-		return compileSlice(in.(validator.Slice))
+	case map[string]interface{}:
+		return compileMap(in.(map[string]interface{}))
+	case []interface{}:
+		return compileSlice(in.([]interface{}))
 	case isdefs.IsDef:
 		return compileIsDef(in.(isdefs.IsDef))
 	default:
-		msg := fmt.Sprintf("Cannot compile definition from %v (%T). Expected one of 'validator.Map', 'Slice', or 'IsDef'", in, in)
+		msg := fmt.Sprintf("Cannot compile definition from %v (%T). Expected one of 'map[string]interface{}', 'Slice', or 'IsDef'", in, in)
 		return nil, errors.New(msg)
 	}
 }
 
-func compileMap(in validator.Map) (validator validator.Validator, err error) {
+func compileMap(in map[string]interface{}) (validator validator.Validator, err error) {
 	wo, compiled := setupWalkObserver()
 	err = walkMap(in, true, wo)
 
@@ -116,7 +116,7 @@ func compileMap(in validator.Map) (validator validator.Validator, err error) {
 	}, err
 }
 
-func compileSlice(in validator.Slice) (validator validator.Validator, err error) {
+func compileSlice(in []interface{}) (validator validator.Validator, err error) {
 	wo, compiled := setupWalkObserver()
 	err = walkSlice(in, true, wo)
 

@@ -15,7 +15,7 @@ func Is(name string, checker ValueValidator) IsDef {
 	return IsDef{Name: name, Checker: checker}
 }
 
-// A ValueValidator is used to validate a value in a validator.Map.
+// A ValueValidator is used to validate a value in an interface{}.
 type ValueValidator func(path paths.Path, v interface{}) *results.Results
 
 // An IsDef defines the type of Check to do.
@@ -103,7 +103,7 @@ func IsAny(of ...IsDef) IsDef {
 }
 
 // IsUnique instances are used in multiple spots, flagging a value as being in error if it's seen across invocations.
-// To use it, assign IsUnique to a variable, then use that variable multiple times in a validator.Map.
+// To use it, assign IsUnique to a variable, then use that variable multiple times in a map[string]interface{}.
 func IsUnique() IsDef {
 	return ScopedIsUnique().IsUniqueTo("")
 }

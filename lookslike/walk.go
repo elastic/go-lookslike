@@ -22,61 +22,58 @@ import (
 
 	"github.com/elastic/lookslike/lookslike/paths"
 	"github.com/elastic/lookslike/lookslike/util"
-	"github.com/elastic/lookslike/lookslike/validator"
 )
 
 type walkObserverInfo struct {
 	key   paths.PathComponent
 	value interface{}
-	root  validator.Map
+	root  map[string]interface{}
 	path  paths.Path
 }
 
 // walkObserver functions run once per object in the tree.
 type walkObserver func(info walkObserverInfo) error
 
-// walk determine if in is a `validator.Map` or a `Slice` and traverse it if so, otherwise will
+// walk determine if in is a `map[string]interface{}` or a `Slice` and traverse it if so, otherwise will
 // treat it as a scalar and invoke the walk observer on the input value directly.
 func walk(in interface{}, expandPaths bool, wo walkObserver) error {
 	switch in.(type) {
-	case validator.Map:
-		return walkMap(in.(validator.Map), expandPaths, wo)
-	case validator.Slice:
-		return walkSlice(in.(validator.Slice), expandPaths, wo)
+	case map[string]interface{}:
+		return walkMap(in.(map[string]interface{}), expandPaths, wo)
 	case []interface{}:
-		return walkSlice(validator.Slice(in.([]interface{})), expandPaths, wo)
+		return walkSlice(in.([]interface{}), expandPaths, wo)
 	default:
-		return walkScalar(in.(validator.Scalar), expandPaths, wo)
+		return walkInterface(in, expandPaths, wo)
 	}
 }
 
-// walkvalidator.Map is a shorthand way to walk a tree with a map as the root.
-func walkMap(m validator.Map, expandPaths bool, wo walkObserver) error {
+// walkmap[string]interface{} is a shorthand way to walk a tree with a map as the root.
+func walkMap(m map[string]interface{}, expandPaths bool, wo walkObserver) error {
 	return walkFullMap(m, m, paths.Path{}, expandPaths, wo)
 }
 
 // walkSlice walks the provided root slice.
-func walkSlice(s validator.Slice, expandPaths bool, wo walkObserver) error {
-	return walkFullSlice(s, validator.Map{}, paths.Path{}, expandPaths, wo)
+func walkSlice(s []interface{}, expandPaths bool, wo walkObserver) error {
+	return walkFullSlice(s, map[string]interface{}{}, paths.Path{}, expandPaths, wo)
 }
 
-func walkScalar(s validator.Scalar, expandPaths bool, wo walkObserver) error {
+func walkInterface(s interface{}, expandPaths bool, wo walkObserver) error {
 	return wo(walkObserverInfo{
 		value: s,
 		key:   paths.PathComponent{},
-		root:  validator.Map{},
+		root:  map[string]interface{}{},
 		path:  paths.Path{},
 	})
 }
 
-func walkFull(o interface{}, root validator.Map, path paths.Path, expandPaths bool, wo walkObserver) (err error) {
+func walkFull(o interface{}, root map[string]interface{}, path paths.Path, expandPaths bool, wo walkObserver) (err error) {
 	lastPathComponent := path.Last()
 	if lastPathComponent == nil {
 		// In the case of a slice we can have an empty path
-		if _, ok := o.(validator.Slice); ok {
+		if _, ok := o.([]interface{}); ok {
 			lastPathComponent = &paths.PathComponent{}
 		} else {
-			panic("Attempted to traverse an empty Path on a validator.Map in lookslike.walkFull, this should never happen.")
+			panic("Attempted to traverse an empty Path on a map[string]interface{} in lookslike.walkFull, this should never happen.")
 		}
 	}
 
@@ -107,8 +104,8 @@ func walkFull(o interface{}, root validator.Map, path paths.Path, expandPaths bo
 	return nil
 }
 
-// walkFull walks the given validator.Map tree.
-func walkFullMap(m validator.Map, root validator.Map, p paths.Path, expandPaths bool, wo walkObserver) (err error) {
+// walkFull walks the given map[string]interface{} tree.
+func walkFullMap(m map[string]interface{}, root map[string]interface{}, p paths.Path, expandPaths bool, wo walkObserver) (err error) {
 	for k, v := range m {
 		var newPath paths.Path
 		if !expandPaths {
@@ -130,7 +127,7 @@ func walkFullMap(m validator.Map, root validator.Map, p paths.Path, expandPaths 
 	return nil
 }
 
-func walkFullSlice(s validator.Slice, root validator.Map, p paths.Path, expandPaths bool, wo walkObserver) (err error) {
+func walkFullSlice(s []interface{}, root map[string]interface{}, p paths.Path, expandPaths bool, wo walkObserver) (err error) {
 	for idx, v := range s {
 		var newPath paths.Path
 		newPath = p.ExtendSlice(idx)

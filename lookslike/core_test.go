@@ -31,7 +31,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func assertValidator(t *testing.T, validator validator.Validator, input validator.Map) {
+func assertValidator(t *testing.T, validator validator.Validator, input map[string]interface{}) {
 	res := validator(input)
 	assertResults(t, res)
 }
@@ -51,7 +51,7 @@ func TestFlat(t *testing.T) {
 		"baz": 1,
 	}
 
-	vResults := MustCompile(validator.Map{
+	vResults := MustCompile(map[string]interface{}{
 		"foo": "bar",
 		"baz": isdefs.IsIntGt(0),
 	})(m)
@@ -64,7 +64,7 @@ func TestBadFlat(t *testing.T) {
 
 	fakeT := new(testing.T)
 
-	vResults := MustCompile(validator.Map{
+	vResults := MustCompile(map[string]interface{}{
 		"notafield": isdefs.IsDuration,
 	})(m)
 
@@ -77,12 +77,12 @@ func TestBadFlat(t *testing.T) {
 	assert.Equal(t, result, results.KeyMissingVR)
 }
 
-func TestScalar(t *testing.T) {
+func TestInterface(t *testing.T) {
 	results := MustCompile(isdefs.IsEqual(42))(42)
 	assertResults(t, results)
 }
 
-func TestBadScalar(t *testing.T) {
+func TestBadInterface(t *testing.T) {
 	fakeT := new(testing.T)
 
 	results := MustCompile(isdefs.IsEqual(42))(-1)
@@ -95,7 +95,7 @@ func TestBadScalar(t *testing.T) {
 	assert.False(t, result.Valid)
 }
 
-func TestScalarTypeMismatch(t *testing.T) {
+func TestInterfaceTypeMismatch(t *testing.T) {
 	fakeT := new(testing.T)
 
 	results := MustCompile(isdefs.IsEqual(42))("foo")
@@ -110,7 +110,7 @@ func TestScalarTypeMismatch(t *testing.T) {
 
 func TestSlice(t *testing.T) {
 	actual := []interface{}{42, time.Second, "admiral akbar"}
-	results := MustCompile(validator.Slice{42, isdefs.IsDuration, isdefs.IsStringMatching(regexp.MustCompile("bar"))})(actual)
+	results := MustCompile([]interface{}{42, isdefs.IsDuration, isdefs.IsStringMatching(regexp.MustCompile("bar"))})(actual)
 	assertResults(t, results)
 }
 
@@ -118,7 +118,7 @@ func TestBadSlice(t *testing.T) {
 	fakeT := new(testing.T)
 
 	actual := []interface{}{42, time.Second, "admiral akbar"}
-	results := MustCompile(validator.Slice{42, isdefs.IsDuration, isdefs.IsStringMatching(regexp.MustCompile("NOTHERE"))})(actual)
+	results := MustCompile([]interface{}{42, isdefs.IsDuration, isdefs.IsStringMatching(regexp.MustCompile("NOTHERE"))})(actual)
 
 	assertResults(fakeT, results)
 
@@ -135,7 +135,7 @@ func TestSliceStrictness(t *testing.T) {
 
 	actual := []interface{}{42, time.Second, "admiral akbar", "EXTRA"}
 	// One less item than the real thing
-	results := MustCompile(validator.Slice{42, isdefs.IsDuration, isdefs.IsStringMatching(regexp.MustCompile("bar"))})(actual)
+	results := MustCompile([]interface{}{42, isdefs.IsDuration, isdefs.IsStringMatching(regexp.MustCompile("bar"))})(actual)
 
 	assertResults(fakeT, results)
 
@@ -148,7 +148,7 @@ func TestSliceStrictness(t *testing.T) {
 
 func TestPrimitiveSlice(t *testing.T) {
 	actual := []int{1, 1, 2, 3}
-	results := MustCompile(validator.Slice{1, 1, 2, 3})(actual)
+	results := MustCompile([]interface{}{1, 1, 2, 3})(actual)
 	assertResults(t, results)
 }
 
@@ -156,7 +156,7 @@ func TestBadPrimitiveSlice(t *testing.T) {
 	fakeT := new(testing.T)
 
 	actual := []int{1, 2, 3}
-	results := MustCompile(validator.Slice{1, 1, 1})(actual)
+	results := MustCompile([]interface{}{1, 1, 1})(actual)
 
 	assertResults(fakeT, results)
 
@@ -168,15 +168,15 @@ func TestBadPrimitiveSlice(t *testing.T) {
 }
 
 func TestNested(t *testing.T) {
-	m := validator.Map{
-		"foo": validator.Map{
+	m := map[string]interface{}{
+		"foo": map[string]interface{}{
 			"bar": "baz",
 			"dur": time.Duration(100),
 		},
 	}
 
-	results := MustCompile(validator.Map{
-		"foo": validator.Map{
+	results := MustCompile(map[string]interface{}{
+		"foo": map[string]interface{}{
 			"bar": "baz",
 		},
 		"foo.dur": isdefs.IsDuration,
@@ -188,13 +188,13 @@ func TestNested(t *testing.T) {
 }
 
 func TestComposition(t *testing.T) {
-	m := validator.Map{
+	m := map[string]interface{}{
 		"foo": "bar",
 		"baz": "bot",
 	}
 
-	fooValidator := MustCompile(validator.Map{"foo": "bar"})
-	bazValidator := MustCompile(validator.Map{"baz": "bot"})
+	fooValidator := MustCompile(map[string]interface{}{"foo": "bar"})
+	bazValidator := MustCompile(map[string]interface{}{"baz": "bot"})
 	composed := Compose(fooValidator, bazValidator)
 
 	// Test that the validators work individually
@@ -207,7 +207,7 @@ func TestComposition(t *testing.T) {
 	composedRes := composed(m)
 	assert.Len(t, composedRes.Fields, 2)
 
-	badValidator := MustCompile(validator.Map{"notakey": "blah"})
+	badValidator := MustCompile(map[string]interface{}{"notakey": "blah"})
 	badComposed := Compose(badValidator, composed)
 
 	fakeT := new(testing.T)
@@ -219,21 +219,21 @@ func TestComposition(t *testing.T) {
 }
 
 func TestStrictFunc(t *testing.T) {
-	m := validator.Map{
+	m := map[string]interface{}{
 		"foo": "bar",
 		"baz": "bot",
-		"nest": validator.Map{
-			"very": validator.Map{
+		"nest": map[string]interface{}{
+			"very": map[string]interface{}{
 				"deep": "true",
 			},
 		},
 	}
 
-	validValidator := MustCompile(validator.Map{
+	validValidator := MustCompile(map[string]interface{}{
 		"foo": "bar",
 		"baz": "bot",
-		"nest": validator.Map{
-			"very": validator.Map{
+		"nest": map[string]interface{}{
+			"very": map[string]interface{}{
 				"deep": "true",
 			},
 		},
@@ -241,7 +241,7 @@ func TestStrictFunc(t *testing.T) {
 
 	assertValidator(t, validValidator, m)
 
-	partialValidator := MustCompile(validator.Map{
+	partialValidator := MustCompile(map[string]interface{}{
 		"foo": "bar",
 	})
 
@@ -257,11 +257,11 @@ func TestStrictFunc(t *testing.T) {
 }
 
 func TestExistence(t *testing.T) {
-	m := validator.Map{
+	m := map[string]interface{}{
 		"exists": "foo",
 	}
 
-	validator := MustCompile(validator.Map{
+	validator := MustCompile(map[string]interface{}{
 		"exists": isdefs.KeyPresent,
 		"non":    isdefs.KeyMissing,
 	})
@@ -270,40 +270,40 @@ func TestExistence(t *testing.T) {
 }
 
 func TestComplex(t *testing.T) {
-	m := validator.Map{
+	m := map[string]interface{}{
 		"foo": "bar",
-		"hash": validator.Map{
+		"hash": map[string]interface{}{
 			"baz": 1,
 			"bot": 2,
-			"deep_hash": validator.Map{
+			"deep_hash": map[string]interface{}{
 				"qux": "quark",
 			},
 		},
 		"slice": []string{"pizza", "pasta", "and more"},
 		"empty": nil,
-		"arr":   []validator.Map{{"foo": "bar"}, {"foo": "baz"}},
+		"arr":   []map[string]interface{}{{"foo": "bar"}, {"foo": "baz"}},
 	}
 
-	validator := MustCompile(validator.Map{
+	validator := MustCompile(map[string]interface{}{
 		"foo": "bar",
-		"hash": validator.Map{
+		"hash": map[string]interface{}{
 			"baz": 1,
 			"bot": 2,
-			"deep_hash": validator.Map{
+			"deep_hash": map[string]interface{}{
 				"qux": "quark",
 			},
 		},
 		"slice":        []string{"pizza", "pasta", "and more"},
 		"empty":        isdefs.KeyPresent,
 		"doesNotExist": isdefs.KeyMissing,
-		"arr":          isdefs.IsSliceOf(MustCompile(validator.Map{"foo": isdefs.IsStringContaining("a")})),
+		"arr":          isdefs.IsSliceOf(MustCompile(map[string]interface{}{"foo": isdefs.IsStringContaining("a")})),
 	})
 
 	assertValidator(t, validator, m)
 }
 
 func TestLiteralArray(t *testing.T) {
-	m := validator.Map{
+	m := map[string]interface{}{
 		"a": []interface{}{
 			[]interface{}{1, 2, 3},
 			[]interface{}{"foo", "bar"},
@@ -311,7 +311,7 @@ func TestLiteralArray(t *testing.T) {
 		},
 	}
 
-	validator := MustCompile(validator.Map{
+	validator := MustCompile(map[string]interface{}{
 		"a": []interface{}{
 			[]interface{}{1, 2, 3},
 			[]interface{}{"foo", "bar"},
@@ -328,11 +328,11 @@ func TestLiteralArray(t *testing.T) {
 }
 
 func TestStringSlice(t *testing.T) {
-	m := validator.Map{
+	m := map[string]interface{}{
 		"a": []string{"a", "b"},
 	}
 
-	validator := MustCompile(validator.Map{
+	validator := MustCompile(map[string]interface{}{
 		"a": []string{"a", "b"},
 	})
 
@@ -349,12 +349,12 @@ func TestEmptySlice(t *testing.T) {
 	// In this case we're treating the slice as a value and doing a literal comparison
 	// Users should use an IsDef testing for an empty slice (that can use reflection)
 	// if they need something else.
-	m := validator.Map{
+	m := map[string]interface{}{
 		"a": []interface{}{},
 		"b": []string{},
 	}
 
-	validator := MustCompile(validator.Map{
+	validator := MustCompile(map[string]interface{}{
 		"a": []interface{}{},
 		"b": []string{},
 	})
@@ -366,14 +366,14 @@ func TestEmptySlice(t *testing.T) {
 }
 
 func TestLiteralMdSlice(t *testing.T) {
-	m := validator.Map{
+	m := map[string]interface{}{
 		"a": [][]int{
 			{1, 2, 3},
 			{4, 5, 6},
 		},
 	}
 
-	v := MustCompile(validator.Map{
+	v := MustCompile(map[string]interface{}{
 		"a": [][]int{
 			{1, 2, 3},
 			{4, 5, 6},
@@ -387,7 +387,7 @@ func TestLiteralMdSlice(t *testing.T) {
 	// This is kind of easier, but maybe we should do our own traversal later.
 	assert.Len(t, goodRes.Fields, 6)
 
-	badValidator := Strict(MustCompile(validator.Map{
+	badValidator := Strict(MustCompile(map[string]interface{}{
 		"a": [][]int{
 			{1, 2, 3},
 		},
@@ -402,19 +402,19 @@ func TestLiteralMdSlice(t *testing.T) {
 }
 
 func TestSliceOfIsDefs(t *testing.T) {
-	m := validator.Map{
+	m := map[string]interface{}{
 		"a": []int{1, 2, 3},
 		"b": []interface{}{"foo", "bar", 3},
 	}
 
-	goodV := MustCompile(validator.Map{
+	goodV := MustCompile(map[string]interface{}{
 		"a": []interface{}{isdefs.IsIntGt(0), isdefs.IsIntGt(1), 3},
 		"b": []interface{}{isdefs.IsStringContaining("o"), "bar", isdefs.IsIntGt(2)},
 	})
 
 	assertValidator(t, goodV, m)
 
-	badV := MustCompile(validator.Map{
+	badV := MustCompile(map[string]interface{}{
 		"a": []interface{}{isdefs.IsIntGt(100), isdefs.IsIntGt(1), 3},
 		"b": []interface{}{isdefs.IsStringContaining("X"), "bar", isdefs.IsIntGt(2)},
 	})
@@ -425,19 +425,19 @@ func TestSliceOfIsDefs(t *testing.T) {
 }
 
 func TestMatchArrayAsValue(t *testing.T) {
-	m := validator.Map{
+	m := map[string]interface{}{
 		"a": []int{1, 2, 3},
 		"b": []interface{}{"foo", "bar", 3},
 	}
 
-	goodV := MustCompile(validator.Map{
+	goodV := MustCompile(map[string]interface{}{
 		"a": []int{1, 2, 3},
 		"b": []interface{}{"foo", "bar", 3},
 	})
 
 	assertValidator(t, goodV, m)
 
-	badV := MustCompile(validator.Map{
+	badV := MustCompile(map[string]interface{}{
 		"a": "robot",
 		"b": []interface{}{"foo", "bar", 3},
 	})
@@ -453,7 +453,7 @@ func TestMatchArrayAsValue(t *testing.T) {
 
 func TestInvalidPathIsdef(t *testing.T) {
 	badPath := "foo...bar"
-	_, err := compile(validator.Map{
+	_, err := compile(map[string]interface{}{
 		badPath: "invalid",
 	})
 
@@ -462,11 +462,11 @@ func TestInvalidPathIsdef(t *testing.T) {
 
 // This test is here, not in isdefs because it really is testing core functionality
 func TestOptional(t *testing.T) {
-	m := validator.Map{
+	m := map[string]interface{}{
 		"foo": "bar",
 	}
 
-	validator := MustCompile(validator.Map{
+	validator := MustCompile(map[string]interface{}{
 		"non": isdefs.Optional(isdefs.IsEqual("foo")),
 	})
 
