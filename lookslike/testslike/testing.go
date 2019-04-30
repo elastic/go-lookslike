@@ -20,7 +20,7 @@ package testslike
 import (
 	"testing"
 
-	"github.com/elastic/lookslike/lookslike/results"
+	"github.com/elastic/lookslike/lookslike/llresult"
 	"github.com/elastic/lookslike/lookslike/validator"
 
 	"github.com/davecgh/go-spew/spew"
@@ -29,7 +29,7 @@ import (
 
 // Test takes the output from a validator.Validator invocation and runs test assertions on the result.
 // If you are using this library for testing you will probably want to run Test(t, Compile(map[string]interface{}{...}), actual) as a pattern.
-func Test(t *testing.T, validator validator.Validator, value interface{}) *results.Results {
+func Test(t *testing.T, validator validator.Validator, value interface{}) *llresult.Results {
 	r := validator(value)
 
 	if !r.Valid {

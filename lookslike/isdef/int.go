@@ -1,25 +1,25 @@
-package isdefs
+package isdef
 
 import (
 	"fmt"
 
-	"github.com/elastic/lookslike/lookslike/paths"
-	"github.com/elastic/lookslike/lookslike/results"
+	"github.com/elastic/lookslike/lookslike/llpath"
+	"github.com/elastic/lookslike/lookslike/llresult"
 )
 
 func intGtChecker(than int) ValueValidator {
-	return func(path paths.Path, v interface{}) *results.Results {
+	return func(path llpath.Path, v interface{}) *llresult.Results {
 		n, ok := v.(int)
 		if !ok {
 			msg := fmt.Sprintf("%v is a %T, but was expecting an int!", v, v)
-			return results.SimpleResult(path, false, msg)
+			return llresult.SimpleResult(path, false, msg)
 		}
 
 		if n > than {
-			return results.ValidResult(path)
+			return llresult.ValidResult(path)
 		}
 
-		return results.SimpleResult(
+		return llresult.SimpleResult(
 			path,
 			false,
 			fmt.Sprintf("%v is not greater than %v", n, than),

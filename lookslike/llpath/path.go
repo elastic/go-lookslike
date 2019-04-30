@@ -15,7 +15,7 @@
 // specific language governing permissions and limitations
 // under the License.
 
-package paths
+package llpath
 
 import (
 	"fmt"
@@ -24,7 +24,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/elastic/lookslike/lookslike/util"
+	"github.com/elastic/lookslike/lookslike/llutil"
 )
 
 // PathComponentType indicates the type of PathComponent.
@@ -125,10 +125,10 @@ func (p Path) GetFrom(m interface{}) (value interface{}, exists bool) {
 		rt := reflect.TypeOf(value)
 		switch rt.Kind() {
 		case reflect.Map:
-			converted := util.InterfaceToMap(value)
+			converted := llutil.InterfaceToMap(value)
 			value, exists = converted[pc.Key]
 		case reflect.Slice:
-			converted := util.InterfaceToSliceOfInterfaces(value)
+			converted := llutil.InterfaceToSliceOfInterfaces(value)
 			if pc.Index < len(converted) {
 				exists = true
 				value = converted[pc.Index]

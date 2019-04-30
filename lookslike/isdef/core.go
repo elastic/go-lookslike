@@ -1,11 +1,11 @@
-package isdefs
+package isdef
 
 import (
 	"fmt"
 	"reflect"
 
-	"github.com/elastic/lookslike/lookslike/paths"
-	"github.com/elastic/lookslike/lookslike/results"
+	"github.com/elastic/lookslike/lookslike/llpath"
+	"github.com/elastic/lookslike/lookslike/llresult"
 )
 
 // IsEqual tests that the given object is equal to the actual object.
@@ -21,7 +21,7 @@ func IsEqual(to interface{}) IsDef {
 	// We know this is an isdef due to the Register check previously
 	checker := isDefFactory.Call([]reflect.Value{toV})[0].Interface().(IsDef).Checker
 
-	return Is("equals", func(path paths.Path, v interface{}) *results.Results {
+	return Is("equals", func(path llpath.Path, v interface{}) *llresult.Results {
 		return checker(path, v)
 	})
 }
@@ -84,11 +84,11 @@ func RegisterEqual(fn interface{}) error {
 
 // IsDeepEqual checks equality using reflect.DeepEqual.
 func IsDeepEqual(to interface{}) IsDef {
-	return Is("equals", func(path paths.Path, v interface{}) *results.Results {
+	return Is("equals", func(path llpath.Path, v interface{}) *llresult.Results {
 		if reflect.DeepEqual(v, to) {
-			return results.ValidResult(path)
+			return llresult.ValidResult(path)
 		}
-		return results.SimpleResult(
+		return llresult.SimpleResult(
 			path,
 			false,
 			fmt.Sprintf("objects not equal: actual(%T(%v)) != expected(%T(%v))", v, v, to, to),
@@ -97,11 +97,11 @@ func IsDeepEqual(to interface{}) IsDef {
 }
 
 // IsNil tests that a value is nil.
-var IsNil = Is("is nil", func(path paths.Path, v interface{}) *results.Results {
+var IsNil = Is("is nil", func(path llpath.Path, v interface{}) *llresult.Results {
 	if v == nil {
-		return results.ValidResult(path)
+		return llresult.ValidResult(path)
 	}
-	return results.SimpleResult(
+	return llresult.SimpleResult(
 		path,
 		false,
 		fmt.Sprintf("Value %v is not nil", v),

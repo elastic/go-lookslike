@@ -22,9 +22,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/elastic/lookslike/lookslike/isdefs"
-	"github.com/elastic/lookslike/lookslike/paths"
-	"github.com/elastic/lookslike/lookslike/results"
+	"github.com/elastic/lookslike/lookslike/isdef"
+	"github.com/elastic/lookslike/lookslike/llpath"
+	"github.com/elastic/lookslike/lookslike/llresult"
 	"github.com/elastic/lookslike/lookslike/validator"
 	"github.com/stretchr/testify/require"
 
@@ -37,7 +37,7 @@ func assertValidator(t *testing.T, validator validator.Validator, input map[stri
 }
 
 // assertResults validates the schema passed successfully.
-func assertResults(t *testing.T, r *results.Results) *results.Results {
+func assertResults(t *testing.T, r *llresult.Results) *llresult.Results {
 	for _, err := range r.Errors() {
 		assert.NoError(t, err)
 	}
@@ -53,7 +53,7 @@ func TestFlat(t *testing.T) {
 
 	vResults := MustCompile(map[string]interface{}{
 		"foo": "bar",
-		"baz": isdefs.IsIntGt(0),
+		"baz": isdef.IsIntGt(0),
 	})(m)
 
 	assertResults(t, vResults)
@@ -65,7 +65,7 @@ func TestBadFlat(t *testing.T) {
 	fakeT := new(testing.T)
 
 	vResults := MustCompile(map[string]interface{}{
-		"notafield": isdefs.IsDuration,
+		"notafield": isdef.IsDuration,
 	})(m)
 
 	assertResults(fakeT, vResults)
@@ -74,18 +74,18 @@ func TestBadFlat(t *testing.T) {
 
 	result := vResults.Fields["notafield"][0]
 	assert.False(t, result.Valid)
-	assert.Equal(t, result, results.KeyMissingVR)
+	assert.Equal(t, result, llresult.KeyMissingVR)
 }
 
 func TestInterface(t *testing.T) {
-	results := MustCompile(isdefs.IsEqual(42))(42)
+	results := MustCompile(isdef.IsEqual(42))(42)
 	assertResults(t, results)
 }
 
 func TestBadInterface(t *testing.T) {
 	fakeT := new(testing.T)
 
-	results := MustCompile(isdefs.IsEqual(42))(-1)
+	results := MustCompile(isdef.IsEqual(42))(-1)
 
 	assertResults(fakeT, results)
 
@@ -98,7 +98,7 @@ func TestBadInterface(t *testing.T) {
 func TestInterfaceTypeMismatch(t *testing.T) {
 	fakeT := new(testing.T)
 
-	results := MustCompile(isdefs.IsEqual(42))("foo")
+	results := MustCompile(isdef.IsEqual(42))("foo")
 
 	assertResults(fakeT, results)
 
@@ -110,7 +110,7 @@ func TestInterfaceTypeMismatch(t *testing.T) {
 
 func TestSlice(t *testing.T) {
 	actual := []interface{}{42, time.Second, "admiral akbar"}
-	results := MustCompile([]interface{}{42, isdefs.IsDuration, isdefs.IsStringMatching(regexp.MustCompile("bar"))})(actual)
+	results := MustCompile([]interface{}{42, isdef.IsDuration, isdef.IsStringMatching(regexp.MustCompile("bar"))})(actual)
 	assertResults(t, results)
 }
 
@@ -118,7 +118,7 @@ func TestBadSlice(t *testing.T) {
 	fakeT := new(testing.T)
 
 	actual := []interface{}{42, time.Second, "admiral akbar"}
-	results := MustCompile([]interface{}{42, isdefs.IsDuration, isdefs.IsStringMatching(regexp.MustCompile("NOTHERE"))})(actual)
+	results := MustCompile([]interface{}{42, isdef.IsDuration, isdef.IsStringMatching(regexp.MustCompile("NOTHERE"))})(actual)
 
 	assertResults(fakeT, results)
 
@@ -135,7 +135,7 @@ func TestSliceStrictness(t *testing.T) {
 
 	actual := []interface{}{42, time.Second, "admiral akbar", "EXTRA"}
 	// One less item than the real thing
-	results := MustCompile([]interface{}{42, isdefs.IsDuration, isdefs.IsStringMatching(regexp.MustCompile("bar"))})(actual)
+	results := MustCompile([]interface{}{42, isdef.IsDuration, isdef.IsStringMatching(regexp.MustCompile("bar"))})(actual)
 
 	assertResults(fakeT, results)
 
@@ -179,7 +179,7 @@ func TestNested(t *testing.T) {
 		"foo": map[string]interface{}{
 			"bar": "baz",
 		},
-		"foo.dur": isdefs.IsDuration,
+		"foo.dur": isdef.IsDuration,
 	})(m)
 
 	assertResults(t, results)
@@ -250,8 +250,8 @@ func TestStrictFunc(t *testing.T) {
 
 	res := Strict(partialValidator)(m)
 
-	assert.Equal(t, []results.ValueResult{results.StrictFailureVR}, res.DetailedErrors().Fields["baz"])
-	assert.Equal(t, []results.ValueResult{results.StrictFailureVR}, res.DetailedErrors().Fields["nest.very.deep"])
+	assert.Equal(t, []llresult.ValueResult{llresult.StrictFailureVR}, res.DetailedErrors().Fields["baz"])
+	assert.Equal(t, []llresult.ValueResult{llresult.StrictFailureVR}, res.DetailedErrors().Fields["nest.very.deep"])
 	assert.Nil(t, res.DetailedErrors().Fields["bar"])
 	assert.False(t, res.Valid)
 }
@@ -262,8 +262,8 @@ func TestExistence(t *testing.T) {
 	}
 
 	validator := MustCompile(map[string]interface{}{
-		"exists": isdefs.KeyPresent,
-		"non":    isdefs.KeyMissing,
+		"exists": isdef.KeyPresent,
+		"non":    isdef.KeyMissing,
 	})
 
 	assertValidator(t, validator, m)
@@ -294,9 +294,9 @@ func TestComplex(t *testing.T) {
 			},
 		},
 		"slice":        []string{"pizza", "pasta", "and more"},
-		"empty":        isdefs.KeyPresent,
-		"doesNotExist": isdefs.KeyMissing,
-		"arr":          isdefs.IsSliceOf(MustCompile(map[string]interface{}{"foo": isdefs.IsStringContaining("a")})),
+		"empty":        isdef.KeyPresent,
+		"doesNotExist": isdef.KeyMissing,
+		"arr":          isdef.IsSliceOf(MustCompile(map[string]interface{}{"foo": isdef.IsStringContaining("a")})),
 	})
 
 	assertValidator(t, validator, m)
@@ -408,15 +408,15 @@ func TestSliceOfIsDefs(t *testing.T) {
 	}
 
 	goodV := MustCompile(map[string]interface{}{
-		"a": []interface{}{isdefs.IsIntGt(0), isdefs.IsIntGt(1), 3},
-		"b": []interface{}{isdefs.IsStringContaining("o"), "bar", isdefs.IsIntGt(2)},
+		"a": []interface{}{isdef.IsIntGt(0), isdef.IsIntGt(1), 3},
+		"b": []interface{}{isdef.IsStringContaining("o"), "bar", isdef.IsIntGt(2)},
 	})
 
 	assertValidator(t, goodV, m)
 
 	badV := MustCompile(map[string]interface{}{
-		"a": []interface{}{isdefs.IsIntGt(100), isdefs.IsIntGt(1), 3},
-		"b": []interface{}{isdefs.IsStringContaining("X"), "bar", isdefs.IsIntGt(2)},
+		"a": []interface{}{isdef.IsIntGt(100), isdef.IsIntGt(1), 3},
+		"b": []interface{}{isdef.IsStringContaining("X"), "bar", isdef.IsIntGt(2)},
 	})
 	badRes := badV(m)
 
@@ -457,7 +457,7 @@ func TestInvalidPathIsdef(t *testing.T) {
 		badPath: "invalid",
 	})
 
-	assert.Equal(t, paths.InvalidPathString(badPath), err)
+	assert.Equal(t, llpath.InvalidPathString(badPath), err)
 }
 
 // This test is here, not in isdefs because it really is testing core functionality
@@ -467,7 +467,7 @@ func TestOptional(t *testing.T) {
 	}
 
 	validator := MustCompile(map[string]interface{}{
-		"non": isdefs.Optional(isdefs.IsEqual("foo")),
+		"non": isdef.Optional(isdef.IsEqual("foo")),
 	})
 
 	require.True(t, validator(m).Valid)

@@ -24,23 +24,23 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/elastic/lookslike/lookslike/isdefs"
-	"github.com/elastic/lookslike/lookslike/paths"
-	"github.com/elastic/lookslike/lookslike/results"
+	"github.com/elastic/lookslike/lookslike/isdef"
+	"github.com/elastic/lookslike/lookslike/llpath"
+	"github.com/elastic/lookslike/lookslike/llresult"
 	"github.com/elastic/lookslike/lookslike/validator"
 )
 
 // Compose combines multiple SchemaValidators into a single one.
 func Compose(validators ...validator.Validator) validator.Validator {
-	return func(actual interface{}) *results.Results {
-		res := make([]*results.Results, len(validators))
+	return func(actual interface{}) *llresult.Results {
+		res := make([]*llresult.Results, len(validators))
 		for idx, validator := range validators {
 			res[idx] = validator(actual)
 		}
 
-		combined := results.NewResults()
+		combined := llresult.NewResults()
 		for _, r := range res {
-			r.EachResult(func(path paths.Path, vr results.ValueResult) bool {
+			r.EachResult(func(path llpath.Path, vr llresult.ValueResult) bool {
 				combined.Record(path, vr)
 				return true
 			})
@@ -51,7 +51,7 @@ func Compose(validators ...validator.Validator) validator.Validator {
 
 // Strict is used when you want any unspecified keys that are encountered to be considered errors.
 func Strict(laxValidator validator.Validator) validator.Validator {
-	return func(actual interface{}) *results.Results {
+	return func(actual interface{}) *llresult.Results {
 		res := laxValidator(actual)
 
 		// The inner workings of this are a little weird
@@ -84,7 +84,7 @@ func Strict(laxValidator validator.Validator) validator.Validator {
 				return nil
 			}
 
-			res.Merge(results.StrictFailureResult(woi.path))
+			res.Merge(llresult.StrictFailureResult(woi.path))
 
 			return nil
 		})
@@ -99,8 +99,8 @@ func compile(in interface{}) (validator.Validator, error) {
 		return compileMap(in.(map[string]interface{}))
 	case []interface{}:
 		return compileSlice(in.([]interface{}))
-	case isdefs.IsDef:
-		return compileIsDef(in.(isdefs.IsDef))
+	case isdef.IsDef:
+		return compileIsDef(in.(isdef.IsDef))
 	default:
 		msg := fmt.Sprintf("Cannot compile definition from %v (%T). Expected one of 'map[string]interface{}', 'Slice', or 'IsDef'", in, in)
 		return nil, errors.New(msg)
@@ -111,7 +111,7 @@ func compileMap(in map[string]interface{}) (validator validator.Validator, err e
 	wo, compiled := setupWalkObserver()
 	err = walkMap(in, true, wo)
 
-	return func(actual interface{}) *results.Results {
+	return func(actual interface{}) *llresult.Results {
 		return compiled.Check(actual)
 	}, err
 }
@@ -122,14 +122,14 @@ func compileSlice(in []interface{}) (validator validator.Validator, err error) {
 
 	// Slices are always strict in validation because
 	// it would be surprising to only validate the first specified values
-	return Strict(func(actual interface{}) *results.Results {
+	return Strict(func(actual interface{}) *llresult.Results {
 		return compiled.Check(actual)
 	}), err
 }
 
-func compileIsDef(def isdefs.IsDef) (validator validator.Validator, err error) {
-	return func(actual interface{}) *results.Results {
-		return def.Check(paths.Path{}, actual, true)
+func compileIsDef(def isdef.IsDef) (validator validator.Validator, err error) {
+	return func(actual interface{}) *llresult.Results {
+		return def.Check(llpath.Path{}, actual, true)
 	}, nil
 }
 
@@ -145,9 +145,9 @@ func setupWalkObserver() (walkObserver, *CompiledSchema) {
 		isNonEmptyCollection := isCollection && rv.Len() > 0
 
 		if !isNonEmptyCollection {
-			isDef, isIsDef := current.value.(isdefs.IsDef)
+			isDef, isIsDef := current.value.(isdef.IsDef)
 			if !isIsDef {
-				isDef = isdefs.IsEqual(current.value)
+				isDef = isdef.IsEqual(current.value)
 			}
 
 			compiled = append(compiled, flatValidator{current.path, isDef})

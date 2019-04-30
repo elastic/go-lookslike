@@ -1,16 +1,16 @@
-package isdefs
+package isdef
 
 import (
 	"testing"
 	"time"
 
-	"github.com/elastic/lookslike/lookslike/paths"
-	"github.com/elastic/lookslike/lookslike/results"
+	"github.com/elastic/lookslike/lookslike/llpath"
+	"github.com/elastic/lookslike/lookslike/llresult"
 	"github.com/stretchr/testify/assert"
 )
 
-func assertIsDefValid(t *testing.T, id IsDef, value interface{}) *results.Results {
-	res := id.Check(paths.MustParsePath("p"), value, true)
+func assertIsDefValid(t *testing.T, id IsDef, value interface{}) *llresult.Results {
+	res := id.Check(llpath.MustParsePath("p"), value, true)
 
 	if !res.Valid {
 		assert.Fail(
@@ -22,8 +22,8 @@ func assertIsDefValid(t *testing.T, id IsDef, value interface{}) *results.Result
 	return res
 }
 
-func assertIsDefInvalid(t *testing.T, id IsDef, value interface{}) *results.Results {
-	res := id.Check(paths.MustParsePath("p"), value, true)
+func assertIsDefInvalid(t *testing.T, id IsDef, value interface{}) *llresult.Results {
+	res := id.Check(llpath.MustParsePath("p"), value, true)
 
 	if res.Valid {
 		assert.Fail(

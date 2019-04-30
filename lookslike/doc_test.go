@@ -21,9 +21,9 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/elastic/lookslike/lookslike/isdefs"
-	"github.com/elastic/lookslike/lookslike/paths"
-	"github.com/elastic/lookslike/lookslike/results"
+	"github.com/elastic/lookslike/lookslike/isdef"
+	"github.com/elastic/lookslike/lookslike/llpath"
+	"github.com/elastic/lookslike/lookslike/llresult"
 )
 
 func Example() {
@@ -41,7 +41,7 @@ func Example() {
 	// contains the string "a", and we're using a literal to Check that the
 	// "baz" key contains the exact value "bot".
 	validator := MustCompile(map[string]interface{}{
-		"foo": isdefs.IsStringContaining("a"),
+		"foo": isdef.IsStringContaining("a"),
 		"baz": "bot",
 	})
 
@@ -100,11 +100,11 @@ func ExampleCompose() {
 	// We'll start by creating a composed IsDef using the IsAny composition, which creates a new IsDef that is
 	// a logical 'or' of its IsDef arguments
 
-	isFrequency := isdefs.IsAny(isdefs.IsEqual("often"), isdefs.IsEqual("rarely"))
+	isFrequency := isdef.IsAny(isdef.IsEqual("often"), isdef.IsEqual("rarely"))
 
 	petValidator := MustCompile(map[string]interface{}{
-		"Name":       isdefs.IsNonEmptyString,
-		"fur_length": isdefs.IsAny(isdefs.IsEqual("long"), isdefs.IsEqual("short")),
+		"Name":       isdef.IsNonEmptyString,
+		"fur_length": isdef.IsAny(isdef.IsEqual("long"), isdef.IsEqual("short")),
 	})
 	dogValidator := Compose(
 		petValidator,
@@ -136,7 +136,7 @@ func ExampleOptional() {
 	dataNoError := map[string]interface{}{"foo": "bar"}
 	dataError := map[string]interface{}{"foo": "bar", "error": true}
 
-	validator := MustCompile(map[string]interface{}{"foo": "bar", "error": isdefs.Optional(isdefs.IsEqual(true))})
+	validator := MustCompile(map[string]interface{}{"foo": "bar", "error": isdef.Optional(isdef.IsEqual(true))})
 
 	// Both inputs pass
 	fmt.Printf("Validator classifies both maps as true: %t", validator(dataNoError).Valid && validator(dataError).Valid)
@@ -154,17 +154,17 @@ func ExampleIs() {
 	// Values can also be tested programatically if a lookslike.IsDef is used as a value
 	// Here we'll define a custom IsDef using the lookslike DSL, then validate it.
 	// The Is() function is the preferred way to costruct IsDef objects.
-	startsWithB := isdefs.Is("starts with b", func(path paths.Path, v interface{}) *results.Results {
+	startsWithB := isdef.Is("starts with b", func(path llpath.Path, v interface{}) *llresult.Results {
 		vStr, ok := v.(string)
 		if !ok {
-			return results.SimpleResult(path, false, "Expected a string, got a %t", v)
+			return llresult.SimpleResult(path, false, "Expected a string, got a %t", v)
 		}
 
 		if strings.HasPrefix(vStr, "b") {
-			return results.ValidResult(path)
+			return llresult.ValidResult(path)
 		}
 
-		return results.SimpleResult(path, false, "Expected string to start with b, got %v", vStr)
+		return llresult.SimpleResult(path, false, "Expected string to start with b, got %v", vStr)
 	})
 
 	funcValidator := MustCompile(map[string]interface{}{"foo": startsWithB})
@@ -179,7 +179,7 @@ func ExampleIs() {
 
 func ExampleMap() {
 	v := MustCompile(map[string]interface{}{
-		"foo": isdefs.IsStringContaining("a"),
+		"foo": isdef.IsStringContaining("a"),
 		"baz": "bot",
 	})
 
@@ -196,7 +196,7 @@ func ExampleMap() {
 
 func ExampleSlice() {
 	v := MustCompile(map[string]interface{}{
-		"foo": []interface{}{"foo", isdefs.IsNonEmptyString},
+		"foo": []interface{}{"foo", isdef.IsNonEmptyString},
 	})
 
 	data := map[string]interface{}{"foo": []string{"foo", "something"}}

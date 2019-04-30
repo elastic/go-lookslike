@@ -1,4 +1,4 @@
-package isdefs
+package isdef
 
 import (
 	"regexp"

@@ -20,15 +20,15 @@ package lookslike
 import (
 	"reflect"
 
-	"github.com/elastic/lookslike/lookslike/paths"
-	"github.com/elastic/lookslike/lookslike/util"
+	"github.com/elastic/lookslike/lookslike/llpath"
+	"github.com/elastic/lookslike/lookslike/llutil"
 )
 
 type walkObserverInfo struct {
-	key   paths.PathComponent
+	key   llpath.PathComponent
 	value interface{}
 	root  map[string]interface{}
-	path  paths.Path
+	path  llpath.Path
 }
 
 // walkObserver functions run once per object in the tree.
@@ -49,29 +49,29 @@ func walk(in interface{}, expandPaths bool, wo walkObserver) error {
 
 // walkmap[string]interface{} is a shorthand way to walk a tree with a map as the root.
 func walkMap(m map[string]interface{}, expandPaths bool, wo walkObserver) error {
-	return walkFullMap(m, m, paths.Path{}, expandPaths, wo)
+	return walkFullMap(m, m, llpath.Path{}, expandPaths, wo)
 }
 
 // walkSlice walks the provided root slice.
 func walkSlice(s []interface{}, expandPaths bool, wo walkObserver) error {
-	return walkFullSlice(s, map[string]interface{}{}, paths.Path{}, expandPaths, wo)
+	return walkFullSlice(s, map[string]interface{}{}, llpath.Path{}, expandPaths, wo)
 }
 
 func walkInterface(s interface{}, expandPaths bool, wo walkObserver) error {
 	return wo(walkObserverInfo{
 		value: s,
-		key:   paths.PathComponent{},
+		key:   llpath.PathComponent{},
 		root:  map[string]interface{}{},
-		path:  paths.Path{},
+		path:  llpath.Path{},
 	})
 }
 
-func walkFull(o interface{}, root map[string]interface{}, path paths.Path, expandPaths bool, wo walkObserver) (err error) {
+func walkFull(o interface{}, root map[string]interface{}, path llpath.Path, expandPaths bool, wo walkObserver) (err error) {
 	lastPathComponent := path.Last()
 	if lastPathComponent == nil {
 		// In the case of a slice we can have an empty path
 		if _, ok := o.([]interface{}); ok {
-			lastPathComponent = &paths.PathComponent{}
+			lastPathComponent = &llpath.PathComponent{}
 		} else {
 			panic("Attempted to traverse an empty Path on a map[string]interface{} in lookslike.walkFull, this should never happen.")
 		}
@@ -84,13 +84,13 @@ func walkFull(o interface{}, root map[string]interface{}, path paths.Path, expan
 
 	switch reflect.TypeOf(o).Kind() {
 	case reflect.Map:
-		converted := util.InterfaceToMap(o)
+		converted := llutil.InterfaceToMap(o)
 		err := walkFullMap(converted, root, path, expandPaths, wo)
 		if err != nil {
 			return err
 		}
 	case reflect.Slice:
-		converted := util.InterfaceToSliceOfInterfaces(o)
+		converted := llutil.InterfaceToSliceOfInterfaces(o)
 
 		for idx, v := range converted {
 			newPath := path.ExtendSlice(idx)
@@ -105,13 +105,13 @@ func walkFull(o interface{}, root map[string]interface{}, path paths.Path, expan
 }
 
 // walkFull walks the given map[string]interface{} tree.
-func walkFullMap(m map[string]interface{}, root map[string]interface{}, p paths.Path, expandPaths bool, wo walkObserver) (err error) {
+func walkFullMap(m map[string]interface{}, root map[string]interface{}, p llpath.Path, expandPaths bool, wo walkObserver) (err error) {
 	for k, v := range m {
-		var newPath paths.Path
+		var newPath llpath.Path
 		if !expandPaths {
 			newPath = p.ExtendMap(k)
 		} else {
-			additionalPath, err := paths.ParsePath(k)
+			additionalPath, err := llpath.ParsePath(k)
 			if err != nil {
 				return err
 			}
@@ -127,9 +127,9 @@ func walkFullMap(m map[string]interface{}, root map[string]interface{}, p paths.
 	return nil
 }
 
-func walkFullSlice(s []interface{}, root map[string]interface{}, p paths.Path, expandPaths bool, wo walkObserver) (err error) {
+func walkFullSlice(s []interface{}, root map[string]interface{}, p llpath.Path, expandPaths bool, wo walkObserver) (err error) {
 	for idx, v := range s {
-		var newPath paths.Path
+		var newPath llpath.Path
 		newPath = p.ExtendSlice(idx)
 
 		err = walkFull(v, root, newPath, expandPaths, wo)

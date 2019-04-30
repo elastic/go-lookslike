@@ -1,12 +1,12 @@
-package isdefs
+package isdef
 
 import (
 	"fmt"
 	"reflect"
 
-	"github.com/elastic/lookslike/lookslike/paths"
-	"github.com/elastic/lookslike/lookslike/results"
-	"github.com/elastic/lookslike/lookslike/util"
+	"github.com/elastic/lookslike/lookslike/llpath"
+	"github.com/elastic/lookslike/lookslike/llresult"
+	"github.com/elastic/lookslike/lookslike/llutil"
 	"github.com/elastic/lookslike/lookslike/validator"
 )
 
@@ -16,7 +16,7 @@ func Is(name string, checker ValueValidator) IsDef {
 }
 
 // A ValueValidator is used to validate a value in an interface{}.
-type ValueValidator func(path paths.Path, v interface{}) *results.Results
+type ValueValidator func(path llpath.Path, v interface{}) *llresult.Results
 
 // An IsDef defines the type of Check to do.
 // Generally only Name and Checker are set. Optional and CheckKeyMissing are
@@ -29,24 +29,24 @@ type IsDef struct {
 }
 
 // Check runs the IsDef at the given value at the given path
-func (id IsDef) Check(path paths.Path, v interface{}, keyExists bool) *results.Results {
+func (id IsDef) Check(path llpath.Path, v interface{}, keyExists bool) *llresult.Results {
 	if id.CheckKeyMissing {
 		if !keyExists {
-			return results.ValidResult(path)
+			return llresult.ValidResult(path)
 		}
 
-		return results.SimpleResult(path, false, "this key should not exist")
+		return llresult.SimpleResult(path, false, "this key should not exist")
 	}
 
 	if !id.Optional && !keyExists {
-		return results.KeyMissingResult(path)
+		return llresult.KeyMissingResult(path)
 	}
 
 	if id.Checker != nil {
 		return id.Checker(path, v)
 	}
 
-	return results.ValidResult(path)
+	return llresult.ValidResult(path)
 }
 
 // Optional wraps an IsDef to mark the field's presence as Optional.
@@ -59,16 +59,16 @@ func Optional(id IsDef) IsDef {
 // IsSliceOf validates that the array at the given key is an array of objects all validatable
 // via the given validator.Validator.
 func IsSliceOf(validator validator.Validator) IsDef {
-	return Is("slice", func(path paths.Path, v interface{}) *results.Results {
+	return Is("slice", func(path llpath.Path, v interface{}) *llresult.Results {
 		if reflect.TypeOf(v).Kind() != reflect.Slice {
-			return results.SimpleResult(path, false, "Expected slice at given path")
+			return llresult.SimpleResult(path, false, "Expected slice at given path")
 		}
-		vSlice := util.InterfaceToSliceOfInterfaces(v)
+		vSlice := llutil.InterfaceToSliceOfInterfaces(v)
 
-		res := results.NewResults()
+		res := llresult.NewResults()
 
 		for idx, curV := range vSlice {
-			var validatorRes *results.Results
+			var validatorRes *llresult.Results
 			validatorRes = validator(curV)
 			res.MergeUnderPrefix(path.ExtendSlice(idx), validatorRes)
 		}
@@ -86,7 +86,7 @@ func IsAny(of ...IsDef) IsDef {
 	}
 	isName := fmt.Sprintf("either %#v", names)
 
-	return Is(isName, func(path paths.Path, v interface{}) *results.Results {
+	return Is(isName, func(path llpath.Path, v interface{}) *llresult.Results {
 		for _, def := range of {
 			vr := def.Check(path, v, true)
 			if vr.Valid {
@@ -94,7 +94,7 @@ func IsAny(of ...IsDef) IsDef {
 			}
 		}
 
-		return results.SimpleResult(
+		return llresult.SimpleResult(
 			path,
 			false,
 			fmt.Sprintf("Value was none of %#v, actual value was %#v", names, v),
@@ -113,16 +113,16 @@ type UniqScopeTracker map[interface{}]string
 
 // IsUniqueTo validates that the given value is only ever seen within a single namespace.
 func (ust UniqScopeTracker) IsUniqueTo(namespace string) IsDef {
-	return Is("unique", func(path paths.Path, v interface{}) *results.Results {
+	return Is("unique", func(path llpath.Path, v interface{}) *llresult.Results {
 		for trackerK, trackerNs := range ust {
 			hasNamespace := len(namespace) > 0
 			if reflect.DeepEqual(trackerK, v) && (!hasNamespace || namespace != trackerNs) {
-				return results.SimpleResult(path, false, "Value '%v' is repeated", v)
+				return llresult.SimpleResult(path, false, "Value '%v' is repeated", v)
 			}
 		}
 
 		ust[v] = namespace
-		return results.ValidResult(path)
+		return llresult.ValidResult(path)
 	})
 }
 

@@ -1,11 +1,11 @@
-package isdefs
+package isdef
 
 import (
 	"reflect"
 	"testing"
 
-	"github.com/elastic/lookslike/lookslike/paths"
-	"github.com/elastic/lookslike/lookslike/results"
+	"github.com/elastic/lookslike/lookslike/llpath"
+	"github.com/elastic/lookslike/lookslike/llresult"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -13,12 +13,12 @@ import (
 func TestIsSliceOf(t *testing.T) {
 	goodMap := map[string]interface{}{"foo": "bar"}
 
-	isFooBarMap := IsSliceOf(func(i interface{}) *results.Results {
+	isFooBarMap := IsSliceOf(func(i interface{}) *llresult.Results {
 		if reflect.DeepEqual(i, goodMap) {
-			return results.ValidResult(paths.MustParsePath("foo"))
+			return llresult.ValidResult(llpath.MustParsePath("foo"))
 		}
 
-		return results.SimpleResult(paths.MustParsePath("foo"), false, "did not match")
+		return llresult.SimpleResult(llpath.MustParsePath("foo"), false, "did not match")
 	})
 
 	goodMapArr := []map[string]interface{}{goodMap, goodMap}
@@ -38,17 +38,17 @@ func TestIsSliceOf(t *testing.T) {
 	assert.Contains(t, badFields, "p.[0].foo")
 }
 func TestIsUnique(t *testing.T) {
-	pathFoo := paths.MustParsePath("foo")
-	pathBar := paths.MustParsePath("bar")
+	pathFoo := llpath.MustParsePath("foo")
+	pathBar := llpath.MustParsePath("bar")
 
 	tests := []struct {
 		name    string
-		fn      func() *results.Results
+		fn      func() *llresult.Results
 		isValid bool
 	}{
 		{
 			"IsUnique find dupes",
-			func() *results.Results {
+			func() *llresult.Results {
 				u := IsUnique()
 				u.Check(pathFoo, "a", true)
 				return u.Check(pathBar, "a", true)
@@ -57,7 +57,7 @@ func TestIsUnique(t *testing.T) {
 		},
 		{
 			"IsUnique separate instances don't care about dupes",
-			func() *results.Results {
+			func() *llresult.Results {
 				IsUnique().Check(pathFoo, "a", true)
 				return IsUnique().Check(pathFoo, "b", true)
 			},
@@ -65,7 +65,7 @@ func TestIsUnique(t *testing.T) {
 		},
 		{
 			"IsUniqueTo duplicates across namespaces fail",
-			func() *results.Results {
+			func() *llresult.Results {
 				s := ScopedIsUnique()
 				s.IsUniqueTo("test").Check(pathFoo, 1, true)
 				return s.IsUniqueTo("test2").Check(pathFoo, 1, true)
@@ -75,7 +75,7 @@ func TestIsUnique(t *testing.T) {
 
 		{
 			"IsUniqueTo duplicates within a namespace succeeds",
-			func() *results.Results {
+			func() *llresult.Results {
 				s := ScopedIsUnique()
 				s.IsUniqueTo("test").Check(pathFoo, 1, true)
 				return s.IsUniqueTo("test").Check(pathBar, 1, true)

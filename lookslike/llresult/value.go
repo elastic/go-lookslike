@@ -15,12 +15,12 @@
 // specific language governing permissions and limitations
 // under the License.
 
-package results
+package llresult
 
-import "github.com/elastic/lookslike/lookslike/paths"
+import "github.com/elastic/lookslike/lookslike/llpath"
 
 // ValidResult is a convenience value for Valid results.
-func ValidResult(p paths.Path) *Results {
+func ValidResult(p llpath.Path) *Results {
 	return SimpleResult(p, true, "is valid")
 }
 
@@ -28,7 +28,7 @@ func ValidResult(p paths.Path) *Results {
 var ValidVR = ValueResult{true, "is valid"}
 
 // KeyMissingResult is emitted when a key was expected, but was not present.
-func KeyMissingResult(path paths.Path) *Results {
+func KeyMissingResult(path llpath.Path) *Results {
 	return SingleResult(path, KeyMissingVR)
 }
 
@@ -39,7 +39,7 @@ var KeyMissingVR = ValueResult{
 }
 
 // StrictFailureResult is emitted when Strict() is used, and an unexpected field is found.
-func StrictFailureResult(path paths.Path) *Results {
+func StrictFailureResult(path llpath.Path) *Results {
 	return SingleResult(path, StrictFailureVR)
 }
 
