@@ -20,8 +20,8 @@ package lookslike
 import (
 	"reflect"
 
+	"github.com/elastic/lookslike/lookslike/internal/llreflect"
 	"github.com/elastic/lookslike/lookslike/llpath"
-	"github.com/elastic/lookslike/lookslike/llutil"
 )
 
 type walkObserverInfo struct {
@@ -84,13 +84,13 @@ func walkFull(o interface{}, root map[string]interface{}, path llpath.Path, expa
 
 	switch reflect.TypeOf(o).Kind() {
 	case reflect.Map:
-		converted := llutil.InterfaceToMap(o)
+		converted := llreflect.InterfaceToMap(o)
 		err := walkFullMap(converted, root, path, expandPaths, wo)
 		if err != nil {
 			return err
 		}
 	case reflect.Slice:
-		converted := llutil.InterfaceToSliceOfInterfaces(o)
+		converted := llreflect.InterfaceToSliceOfInterfaces(o)
 
 		for idx, v := range converted {
 			newPath := path.ExtendSlice(idx)

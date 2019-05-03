@@ -19,12 +19,11 @@ package llpath
 
 import (
 	"fmt"
+	"github.com/elastic/lookslike/lookslike/internal/llreflect"
 	"reflect"
 	"regexp"
 	"strconv"
 	"strings"
-
-	"github.com/elastic/lookslike/lookslike/llutil"
 )
 
 // PathComponentType indicates the type of PathComponent.
@@ -125,10 +124,10 @@ func (p Path) GetFrom(m interface{}) (value interface{}, exists bool) {
 		rt := reflect.TypeOf(value)
 		switch rt.Kind() {
 		case reflect.Map:
-			converted := llutil.InterfaceToMap(value)
+			converted := llreflect.InterfaceToMap(value)
 			value, exists = converted[pc.Key]
 		case reflect.Slice:
-			converted := llutil.InterfaceToSliceOfInterfaces(value)
+			converted := llreflect.InterfaceToSliceOfInterfaces(value)
 			if pc.Index < len(converted) {
 				exists = true
 				value = converted[pc.Index]

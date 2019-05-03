@@ -4,9 +4,9 @@ import (
 	"fmt"
 	"reflect"
 
+	"github.com/elastic/lookslike/lookslike/internal/llreflect"
 	"github.com/elastic/lookslike/lookslike/llpath"
 	"github.com/elastic/lookslike/lookslike/llresult"
-	"github.com/elastic/lookslike/lookslike/llutil"
 	"github.com/elastic/lookslike/lookslike/validator"
 )
 
@@ -63,7 +63,7 @@ func IsSliceOf(validator validator.Validator) IsDef {
 		if reflect.TypeOf(v).Kind() != reflect.Slice {
 			return llresult.SimpleResult(path, false, "Expected slice at given path")
 		}
-		vSlice := llutil.InterfaceToSliceOfInterfaces(v)
+		vSlice := llreflect.InterfaceToSliceOfInterfaces(v)
 
 		res := llresult.NewResults()
 
