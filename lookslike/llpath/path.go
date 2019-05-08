@@ -15,34 +15,35 @@
 // specific language governing permissions and limitations
 // under the License.
 
-package lookslike
+package llpath
 
 import (
 	"fmt"
+	"github.com/elastic/lookslike/lookslike/internal/llreflect"
 	"reflect"
 	"regexp"
 	"strconv"
 	"strings"
 )
 
-// pathComponentType indicates the type of pathComponent.
-type pathComponentType int
+// PathComponentType indicates the type of PathComponent.
+type PathComponentType int
 
 const (
 	// pcMapKey is the Type for map keys.
-	pcMapKey pathComponentType = 1 + iota
+	pcMapKey PathComponentType = 1 + iota
 	// pcSliceIdx is the Type for slice indices.
 	pcSliceIdx
-	//
-	pcScalar
+	// pcInterface is the type for all other values
+	pcInterface
 )
 
-func (pct pathComponentType) String() string {
+func (pct PathComponentType) String() string {
 	if pct == pcMapKey {
 		return "map"
 	} else if pct == pcSliceIdx {
 		return "slice"
-	} else if pct == pcScalar {
+	} else if pct == pcInterface {
 		return "scalar"
 	} else {
 		// This should never happen, but we don't want to return an
@@ -51,14 +52,14 @@ func (pct pathComponentType) String() string {
 	}
 }
 
-// pathComponent structs represent one breadcrumb in a Path.
-type pathComponent struct {
-	Type  pathComponentType // One of pcMapKey or pcSliceIdx
+// PathComponent structs represent one breadcrumb in a Path.
+type PathComponent struct {
+	Type  PathComponentType // One of pcMapKey or pcSliceIdx
 	Key   string            // Populated for maps
 	Index int               // Populated for slices
 }
 
-func (pc pathComponent) String() string {
+func (pc PathComponent) String() string {
 	if pc.Type == pcSliceIdx {
 		return fmt.Sprintf("[%d]", pc.Index)
 	}
@@ -66,23 +67,24 @@ func (pc pathComponent) String() string {
 }
 
 // Path represents the Path within a nested set of maps.
-type Path []pathComponent
+type Path []PathComponent
 
-// ExtendSlice is used to add a new pathComponent of the pcSliceIdx type.
+// ExtendSlice is used to add a new PathComponent of the pcSliceIdx type.
 func (p Path) ExtendSlice(index int) Path {
 	return p.Extend(
-		pathComponent{pcSliceIdx, "", index},
+		PathComponent{pcSliceIdx, "", index},
 	)
 }
 
-// ExtendMap adds a new pathComponent of the pcMapKey type.
+// ExtendMap adds a new PathComponent of the pcMapKey type.
 func (p Path) ExtendMap(key string) Path {
 	return p.Extend(
-		pathComponent{pcMapKey, key, -1},
+		PathComponent{pcMapKey, key, -1},
 	)
 }
 
-func (p Path) Extend(pc pathComponent) Path {
+// Extend lengthens the given path with the given component.
+func (p Path) Extend(pc PathComponent) Path {
 	out := make(Path, len(p)+1)
 	copy(out, p)
 	out[len(p)] = pc
@@ -104,9 +106,9 @@ func (p Path) String() string {
 	return strings.Join(out, ".")
 }
 
-// Last returns a pointer to the Last pathComponent in this Path. If the Path empty,
+// Last returns a pointer to the Last PathComponent in this Path. If the Path empty,
 // a nil pointer is returned.
-func (p Path) Last() *pathComponent {
+func (p Path) Last() *PathComponent {
 	idx := len(p) - 1
 	if idx < 0 {
 		return nil
@@ -122,10 +124,10 @@ func (p Path) GetFrom(m interface{}) (value interface{}, exists bool) {
 		rt := reflect.TypeOf(value)
 		switch rt.Kind() {
 		case reflect.Map:
-			converted := interfaceToMap(value)
+			converted := llreflect.InterfaceToMap(value)
 			value, exists = converted[pc.Key]
 		case reflect.Slice:
-			converted := sliceToSliceOfInterfaces(value)
+			converted := llreflect.InterfaceToSliceOfInterfaces(value)
 			if pc.Index < len(converted) {
 				exists = true
 				value = converted[pc.Index]
@@ -165,7 +167,7 @@ func ParsePath(in string) (p Path, err error) {
 	p = make(Path, len(keyParts))
 	for idx, part := range keyParts {
 		r := arrMatcher.FindStringSubmatch(part)
-		pc := pathComponent{Index: -1}
+		pc := PathComponent{Index: -1}
 		if len(r) > 0 {
 			pc.Type = pcSliceIdx
 			// Cannot fail, validated by regexp already

@@ -15,58 +15,20 @@
 // specific language governing permissions and limitations
 // under the License.
 
-package lookslike
+package llresult
 
-// ValueResult represents the result of checking a leaf value.
-type ValueResult struct {
-	Valid   bool
-	Message string // Reason this is invalid
-}
-
-// A ValueValidator is used to validate a value in a Map.
-type ValueValidator func(path Path, v interface{}) *Results
-
-// An IsDef defines the type of Check to do.
-// Generally only Name and Checker are set. Optional and CheckKeyMissing are
-// needed for weird checks like key presence.
-type IsDef struct {
-	Name            string
-	Checker         ValueValidator
-	Optional        bool
-	CheckKeyMissing bool
-}
-
-// Check runs the IsDef at the given value at the given path
-func (id IsDef) Check(path Path, v interface{}, keyExists bool) *Results {
-	if id.CheckKeyMissing {
-		if !keyExists {
-			return ValidResult(path)
-		}
-
-		return SimpleResult(path, false, "this key should not exist")
-	}
-
-	if !id.Optional && !keyExists {
-		return KeyMissingResult(path)
-	}
-
-	if id.Checker != nil {
-		return id.Checker(path, v)
-	}
-
-	return ValidResult(path)
-}
+import "github.com/elastic/lookslike/lookslike/llpath"
 
 // ValidResult is a convenience value for Valid results.
-func ValidResult(path Path) *Results {
-	return SimpleResult(path, true, "is valid")
+func ValidResult(p llpath.Path) *Results {
+	return SimpleResult(p, true, "is valid")
 }
 
 // ValidVR is a convenience value for Valid results.
 var ValidVR = ValueResult{true, "is valid"}
 
 // KeyMissingResult is emitted when a key was expected, but was not present.
-func KeyMissingResult(path Path) *Results {
+func KeyMissingResult(path llpath.Path) *Results {
 	return SingleResult(path, KeyMissingVR)
 }
 
@@ -77,7 +39,7 @@ var KeyMissingVR = ValueResult{
 }
 
 // StrictFailureResult is emitted when Strict() is used, and an unexpected field is found.
-func StrictFailureResult(path Path) *Results {
+func StrictFailureResult(path llpath.Path) *Results {
 	return SingleResult(path, StrictFailureVR)
 }
 

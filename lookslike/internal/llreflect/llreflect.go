@@ -15,14 +15,15 @@
 // specific language governing permissions and limitations
 // under the License.
 
-package lookslike
+package llreflect
 
 import (
 	"reflect"
 )
 
-func interfaceToMap(o interface{}) Map {
-	newMap := Map{}
+// InterfaceToMap converts the given interface to a map[string]interface{}.
+func InterfaceToMap(o interface{}) map[string]interface{} {
+	newMap := map[string]interface{}{}
 	rv := reflect.ValueOf(o)
 
 	for _, key := range rv.MapKeys() {
@@ -39,7 +40,14 @@ func interfaceToMap(o interface{}) Map {
 	return newMap
 }
 
-func sliceToSliceOfInterfaces(o interface{}) []interface{} {
+// InterfaceToSliceOfInterfaces coerces the given interface into a slice of []interface{}.
+// If the given interface is already []interface{} lets it pass through. If it's another
+// slice type it converts all values to interface{}.
+func InterfaceToSliceOfInterfaces(o interface{}) []interface{} {
+	if reflect.TypeOf(o).Kind() != reflect.Slice {
+		o = []interface{}{o}
+	}
+
 	rv := reflect.ValueOf(o)
 	converted := make([]interface{}, rv.Len())
 	for i := 0; i < rv.Len(); i++ {

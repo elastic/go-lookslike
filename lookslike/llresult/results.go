@@ -15,16 +15,26 @@
 // specific language governing permissions and limitations
 // under the License.
 
-package lookslike
+package llresult
 
-import "fmt"
+import (
+	"fmt"
+
+	"github.com/elastic/lookslike/lookslike/llpath"
+)
 
 // Results the results of executing a schema.
-// They are a flattened map (using dotted paths) of all the values []ValueResult representing the results
+// They are a flattened map (using dotted paths) of all the values ValueResult representing the results
 // of the IsDefs.
 type Results struct {
 	Fields map[string][]ValueResult
 	Valid  bool
+}
+
+//ValueResult represents the result of checking a leaf value.
+type ValueResult struct {
+	Valid   bool
+	Message string // Reason this is invalid
 }
 
 // NewResults creates a new Results object.
@@ -38,49 +48,51 @@ func NewResults() *Results {
 // SimpleResult provides a convenient and simple method for creating a *Results object for a single validation.
 // It's a very common way for validators to return a *Results object, and is generally simpler than
 // using SingleResult.
-func SimpleResult(path Path, valid bool, msg string, args ...interface{}) *Results {
+func SimpleResult(path llpath.Path, valid bool, msg string, args ...interface{}) *Results {
 	vr := ValueResult{valid, fmt.Sprintf(msg, args...)}
 	return SingleResult(path, vr)
 }
 
 // SingleResult returns a *Results object with a single validated value at the given Path
-// using the provided ValueResult as its sole validation.
-func SingleResult(path Path, result ValueResult) *Results {
+// using the providedValueResult as its sole validation.
+func SingleResult(path llpath.Path, result ValueResult) *Results {
 	r := NewResults()
-	r.record(path, result)
+	r.Record(path, result)
 	return r
 }
 
-func (r *Results) merge(other *Results) {
-	for path, valueResults := range other.Fields {
+// Merge combines multiple *Results sets together.
+func (r *Results) Merge(other *Results) {
+	for otherPath, valueResults := range other.Fields {
 		for _, valueResult := range valueResults {
-			r.record(MustParsePath(path), valueResult)
+			r.Record(llpath.MustParsePath(otherPath), valueResult)
 		}
 	}
 }
 
 // MergeUnderPrefix merges the given results at the path specified by the given prefix.
-func (r *Results) MergeUnderPrefix(prefix Path, other *Results) {
+func (r *Results) MergeUnderPrefix(prefix llpath.Path, other *Results) {
 	if len(prefix) == 0 {
-		// If the prefix is empty, just use standard merge
+		// If the prefix is empty, just use standard Merge
 		// No need to add the dots
-		r.merge(other)
+		r.Merge(other)
 		return
 	}
 
-	for path, valueResults := range other.Fields {
+	for otherPath, valueResults := range other.Fields {
 		for _, valueResult := range valueResults {
-			parsed := MustParsePath(path)
-			r.record(prefix.Concat(parsed), valueResult)
+			parsed := llpath.MustParsePath(otherPath)
+			r.Record(prefix.Concat(parsed), valueResult)
 		}
 	}
 }
 
-func (r *Results) record(path Path, result ValueResult) {
-	if r.Fields[path.String()] == nil {
-		r.Fields[path.String()] = []ValueResult{result}
+// Record records a single path result to this instance.
+func (r *Results) Record(p llpath.Path, result ValueResult) {
+	if r.Fields[p.String()] == nil {
+		r.Fields[p.String()] = []ValueResult{result}
 	} else {
-		r.Fields[path.String()] = append(r.Fields[path.String()], result)
+		r.Fields[p.String()] = append(r.Fields[p.String()], result)
 	}
 
 	if !result.Valid {
@@ -91,13 +103,13 @@ func (r *Results) record(path Path, result ValueResult) {
 // EachResult executes the given callback once per Value result.
 // The provided callback can return true to keep iterating, or false
 // to stop.
-func (r Results) EachResult(f func(Path, ValueResult) bool) {
-	for path, pathResults := range r.Fields {
+func (r Results) EachResult(f func(llpath.Path, ValueResult) bool) {
+	for p, pathResults := range r.Fields {
 		for _, result := range pathResults {
 			// We can ignore path parse errors here, those are from scalars and other
 			// types that have an invalid string path
 			// TODO: Find a cleaner way to do this
-			parsed, _ := ParsePath(path)
+			parsed, _ := llpath.ParsePath(p)
 			if !f(parsed, result) {
 				return
 			}
@@ -108,9 +120,9 @@ func (r Results) EachResult(f func(Path, ValueResult) bool) {
 // DetailedErrors returns a new Results object consisting only of error data.
 func (r *Results) DetailedErrors() *Results {
 	errors := NewResults()
-	r.EachResult(func(path Path, vr ValueResult) bool {
+	r.EachResult(func(p llpath.Path, vr ValueResult) bool {
 		if !vr.Valid {
-			errors.record(path, vr)
+			errors.Record(p, vr)
 		}
 
 		return true
@@ -118,9 +130,9 @@ func (r *Results) DetailedErrors() *Results {
 	return errors
 }
 
-// ValueResultError is used to represent an error validating an individual value.
+//ValueResultError is used to represent an error validating an individual value.
 type ValueResultError struct {
-	path        Path
+	path        llpath.Path
 	valueResult ValueResult
 }
 
@@ -133,7 +145,7 @@ func (vre ValueResultError) Error() string {
 func (r Results) Errors() []error {
 	errors := make([]error, 0)
 
-	r.EachResult(func(path Path, vr ValueResult) bool {
+	r.EachResult(func(path llpath.Path, vr ValueResult) bool {
 		if !vr.Valid {
 			errors = append(errors, ValueResultError{path, vr})
 		}
