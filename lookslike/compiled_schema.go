@@ -18,9 +18,9 @@
 package lookslike
 
 import (
-	"github.com/elastic/lookslike/lookslike/isdef"
-	"github.com/elastic/lookslike/lookslike/llpath"
-	"github.com/elastic/lookslike/lookslike/llresult"
+	"github.com/elastic/go-lookslike/lookslike/isdef"
+	"github.com/elastic/go-lookslike/lookslike/llpath"
+	"github.com/elastic/go-lookslike/lookslike/llresult"
 )
 
 type flatValidator struct {

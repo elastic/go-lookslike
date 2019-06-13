@@ -24,10 +24,10 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/elastic/lookslike/lookslike/isdef"
-	"github.com/elastic/lookslike/lookslike/llpath"
-	"github.com/elastic/lookslike/lookslike/llresult"
-	"github.com/elastic/lookslike/lookslike/validator"
+	"github.com/elastic/go-lookslike/lookslike/isdef"
+	"github.com/elastic/go-lookslike/lookslike/llpath"
+	"github.com/elastic/go-lookslike/lookslike/llresult"
+	"github.com/elastic/go-lookslike/lookslike/validator"
 )
 
 // Compose combines multiple SchemaValidators into a single one.

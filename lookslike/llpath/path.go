@@ -19,7 +19,7 @@ package llpath
 
 import (
 	"fmt"
-	"github.com/elastic/lookslike/lookslike/internal/llreflect"
+	"github.com/elastic/go-lookslike/lookslike/internal/llreflect"
 	"reflect"
 	"regexp"
 	"strconv"
