@@ -4,10 +4,10 @@ import (
 	"fmt"
 	"reflect"
 
-	"github.com/elastic/lookslike/lookslike/internal/llreflect"
-	"github.com/elastic/lookslike/lookslike/llpath"
-	"github.com/elastic/lookslike/lookslike/llresult"
-	"github.com/elastic/lookslike/lookslike/validator"
+	"github.com/elastic/go-lookslike/lookslike/internal/llreflect"
+	"github.com/elastic/go-lookslike/lookslike/llpath"
+	"github.com/elastic/go-lookslike/lookslike/llresult"
+	"github.com/elastic/go-lookslike/lookslike/validator"
 )
 
 // Is creates a named IsDef with the given Checker.

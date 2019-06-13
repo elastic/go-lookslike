@@ -4,8 +4,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/elastic/lookslike/lookslike/llpath"
-	"github.com/elastic/lookslike/lookslike/llresult"
+	"github.com/elastic/go-lookslike/lookslike/llpath"
+	"github.com/elastic/go-lookslike/lookslike/llresult"
 	"github.com/stretchr/testify/assert"
 )
 

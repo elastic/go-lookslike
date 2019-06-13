@@ -20,8 +20,8 @@ package lookslike
 import (
 	"reflect"
 
-	"github.com/elastic/lookslike/lookslike/internal/llreflect"
-	"github.com/elastic/lookslike/lookslike/llpath"
+	"github.com/elastic/go-lookslike/lookslike/internal/llreflect"
+	"github.com/elastic/go-lookslike/lookslike/llpath"
 )
 
 type walkObserverInfo struct {
