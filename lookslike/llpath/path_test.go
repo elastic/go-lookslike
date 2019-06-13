@@ -305,7 +305,12 @@ func TestParsePath(t *testing.T) {
 			Path{}.ExtendMap("foo").ExtendSlice(0).ExtendMap("bar").ExtendSlice(1).ExtendMap("baz"),
 			false,
 		},
-		// TODO: The validation and testing for this needs to be better
+		{
+			"empty string",
+			"",
+			Path{},
+			false,
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {

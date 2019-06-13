@@ -104,6 +104,6 @@ var IsNil = Is("is nil", func(path llpath.Path, v interface{}) *llresult.Results
 	return llresult.SimpleResult(
 		path,
 		false,
-		fmt.Sprintf("Value %v is not nil", v),
+		fmt.Sprintf("Value %#v is not nil", v),
 	)
 })

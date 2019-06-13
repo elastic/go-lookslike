@@ -26,9 +26,9 @@ import (
 	"github.com/elastic/go-lookslike/lookslike/llpath"
 	"github.com/elastic/go-lookslike/lookslike/llresult"
 	"github.com/elastic/go-lookslike/lookslike/validator"
-	"github.com/stretchr/testify/require"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func assertValidator(t *testing.T, validator validator.Validator, input map[string]interface{}) {
@@ -471,4 +471,98 @@ func TestOptional(t *testing.T) {
 	})
 
 	require.True(t, validator(m).Valid)
+}
+
+func TestValidatingNilTargets(t *testing.T) {
+	v := MustCompile(map[string]interface{}{
+		"foo": "bar",
+	})
+
+	res := v(nil)
+	require.False(t, res.Valid)
+	require.False(t, res.Fields["foo"][0].Valid)
+}
+
+func TestValidatingNilExpectations(t *testing.T) {
+	v := MustCompile(nil)
+	res := v(nil)
+	require.True(t, res.Valid)
+}
+
+func TestStrictNil(t *testing.T) {
+	v := Strict(MustCompile(nil))
+	require.True(t, v(nil).Valid)
+	require.False(t, v(1).Valid)
+}
+
+func TestPrimitives(t *testing.T) {
+	type testyStructy struct {
+		member1 bool
+		member2 string
+	}
+
+	// Test a bunch of primitive types to ensure that simple matching works.
+	// We can't be exhaustive, this list is merely representative
+	cases := []struct {
+		name string
+		val validator.Validator
+		input interface{}
+		success bool
+	}{
+		{
+		"struct success",
+		MustCompile(testyStructy{true, "foo"}),
+		testyStructy{true, "foo"},
+		true,
+		},
+		{
+		"struct fail",
+		MustCompile(testyStructy{true, "foo"}),
+		testyStructy{false, "foo"},
+		false,
+		},
+		{
+			"type mismatch",
+			MustCompile(1),
+			"astring",
+			false,
+		},
+		{
+			"string success",
+			MustCompile("astring"),
+			"astring",
+			true,
+		},
+		{
+			"string fail",
+			MustCompile("astring"),
+			"bstring",
+			false,
+		},
+		{
+			"int success",
+			MustCompile(123),
+			123,
+			true,
+		},
+		{
+			"int fail",
+			MustCompile(123),
+			-123,
+			false,
+		},
+	}
+
+	for _, c := range cases {
+		t.Run(c.name, func(t *testing.T) {
+			res := c.val(c.input)
+			if c.success {
+				assert.True(t, res.Valid)
+			} else {
+				assert.False(t, res.Valid)
+				assert.Len(t, res.Errors(), 1)
+			}
+			assert.Len(t, res.Fields, 1)
+		})
+	}
 }
