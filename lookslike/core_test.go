@@ -504,22 +504,22 @@ func TestPrimitives(t *testing.T) {
 	// Test a bunch of primitive types to ensure that simple matching works.
 	// We can't be exhaustive, this list is merely representative
 	cases := []struct {
-		name string
-		val validator.Validator
-		input interface{}
+		name    string
+		val     validator.Validator
+		input   interface{}
 		success bool
 	}{
 		{
-		"struct success",
-		MustCompile(testyStructy{true, "foo"}),
-		testyStructy{true, "foo"},
-		true,
+			"struct success",
+			MustCompile(testyStructy{true, "foo"}),
+			testyStructy{true, "foo"},
+			true,
 		},
 		{
-		"struct fail",
-		MustCompile(testyStructy{true, "foo"}),
-		testyStructy{false, "foo"},
-		false,
+			"struct fail",
+			MustCompile(testyStructy{true, "foo"}),
+			testyStructy{false, "foo"},
+			false,
 		},
 		{
 			"type mismatch",
