@@ -35,22 +35,21 @@ func Example() {
 	// type. This is a map[string]interface{} that can be compiled
 	// into a series of checks.
 	//
-	// Literal values in a lookslike.map[string]interface{} are checked for equality.
-	// More complex checks can be done using values of the lookslike.IsDef
-	// type. In this case, we're using an IsDef to see if the "foo" key
-	// contains the string "a", and we're using a literal to Check that the
-	// "baz" key contains the exact value "bot".
+
+	// We can validate the data by defining a validator for this data.
+	//Lookslike has powerful matching features for maps and slices especially.
+	// You can see an example validator below:
 	validator := MustCompile(map[string]interface{}{
 		"foo": isdef.IsStringContaining("a"),
 		"baz": "bot",
 	})
 
-	// When being used in test-suites, you should use looksliketest.Test to execute the validator
+	// When being used in test-suites, you should use testslike.Test to execute the validator
 	// This produces easy to read test output, and outputs one failed assertion per failed matcher
-	// See the docs for looksliketest for more info
-	// looksliketest.Test(t, validator, data)
+	// See the docs for testslike for more info.
+	// testslike.Test(t, validator, data)
 
-	// If you need more control than looksliketest.Test provides, you can use the results directly
+	// If you need more control than testslike.Test provides, you can use the results directly
 	results := validator(data)
 
 	// The Results.Valid property indicates if the validator passed
@@ -59,7 +58,7 @@ func Example() {
 	// Results.Errors() returns one error per failed match
 	fmt.Printf("There were %d errors\n", len(results.Errors()))
 
-	// Results.Fields is a map of paths defined in the input lookslike.map[string]interface{} to the result of their validation
+	// Results.Fields is a map of paths defined in the input map[string]interface{} to the result of their validation
 	// This is useful if you need more control
 	fmt.Printf("Over %d fields\n", len(results.Fields))
 
