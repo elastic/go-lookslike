@@ -4,8 +4,8 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/elastic/go-lookslike/lookslike/llpath"
-	"github.com/elastic/go-lookslike/lookslike/llresult"
+	"github.com/elastic/go-lookslike/llpath"
+	"github.com/elastic/go-lookslike/llresult"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )

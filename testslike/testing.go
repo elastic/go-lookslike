@@ -20,8 +20,8 @@ package testslike
 import (
 	"testing"
 
-	"github.com/elastic/go-lookslike/lookslike/llresult"
-	"github.com/elastic/go-lookslike/lookslike/validator"
+	"github.com/elastic/go-lookslike/llresult"
+	"github.com/elastic/go-lookslike/validator"
 
 	"github.com/davecgh/go-spew/spew"
 	"github.com/stretchr/testify/assert"

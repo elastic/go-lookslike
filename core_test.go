@@ -22,10 +22,10 @@ import (
 	"testing"
 	"time"
 
-	"github.com/elastic/go-lookslike/lookslike/isdef"
-	"github.com/elastic/go-lookslike/lookslike/llpath"
-	"github.com/elastic/go-lookslike/lookslike/llresult"
-	"github.com/elastic/go-lookslike/lookslike/validator"
+	"github.com/elastic/go-lookslike/isdef"
+	"github.com/elastic/go-lookslike/llpath"
+	"github.com/elastic/go-lookslike/llresult"
+	"github.com/elastic/go-lookslike/validator"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
