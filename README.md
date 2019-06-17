@@ -9,6 +9,20 @@ This library is here to help you with all your data validation needs. It's ideal
 * [GoDoc](https://godoc.org/github.com/elastic/go-lookslike) for this library.
 * [Runnable Examples](https://github.com/elastic/go-lookslike/blob/master/lookslike/doc_test.go).
 
+## Install
+
+If using go modules edit `go.mod`, adding the following to your require list, replacing VERSION, with the latest version from our [releases page](https://github.com/elastic/go-lookslike/releases).
+
+```
+require (
+  github.com/elastic/go-lookslike VERSION
+)
+````
+
+If using govendor run:
+
+`govendor fetch github.com/elastic/go-lookslike/lookslike`
+
 ## Real World Usage Examples
 
 lookslike was created to improve the testing of various structures in [elastic/beats](https://github.com/elastic/beats). Searching the tests for `lookslike` will show real world usage.
