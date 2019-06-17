@@ -36,7 +36,7 @@ func Example() {
 	// into a series of checks.
 	//
 
-	//We can validate the data by defining a validator for this data.
+	// We can validate the data by defining a validator for this data.
 	//Lookslike has powerful matching features for maps and slices especially.
 	// You can see an example validator below:
 	validator := MustCompile(map[string]interface{}{
