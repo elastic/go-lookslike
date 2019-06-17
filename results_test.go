@@ -15,33 +15,37 @@
 // specific language governing permissions and limitations
 // under the License.
 
-package testslike
+package lookslike
 
 import (
 	"testing"
 
-	"github.com/elastic/go-lookslike/lookslike/llresult"
-	"github.com/elastic/go-lookslike/lookslike/validator"
+	"github.com/elastic/go-lookslike/llpath"
+	"github.com/elastic/go-lookslike/llresult"
 
-	"github.com/davecgh/go-spew/spew"
 	"github.com/stretchr/testify/assert"
 )
 
-// Test takes the output from a validator.Validator invocation and runs test assertions on the result.
-// If you are using this library for testing you will probably want to run Test(t, Compile(map[string]interface{}{...}), actual) as a pattern.
-func Test(t *testing.T, validator validator.Validator, value interface{}) *llresult.Results {
-	r := validator(value)
+func TestEmpty(t *testing.T) {
+	r := llresult.NewResults()
+	assert.True(t, r.Valid)
+	assert.Empty(t, r.DetailedErrors().Fields)
+	assert.Empty(t, r.Errors())
+}
 
-	if !r.Valid {
-		assert.Fail(
-			t,
-			"lookslike could not validate map",
-			"%d errors validating source: \n%s", len(r.Errors()), spew.Sdump(value),
-		)
-	}
+func TestWithError(t *testing.T) {
+	r := llresult.NewResults()
+	r.Record(llpath.MustParsePath("foo"), llresult.KeyMissingVR)
+	r.Record(llpath.MustParsePath("bar"), llresult.ValidVR)
 
-	for _, err := range r.Errors() {
-		assert.NoError(t, err)
-	}
-	return r
+	assert.False(t, r.Valid)
+
+	assert.Equal(t, llresult.KeyMissingVR, r.Fields["foo"][0])
+	assert.Equal(t, llresult.ValidVR, r.Fields["bar"][0])
+
+	assert.Equal(t, llresult.KeyMissingVR, r.DetailedErrors().Fields["foo"][0])
+	assert.NotContains(t, r.DetailedErrors().Fields, "bar")
+
+	assert.False(t, r.DetailedErrors().Valid)
+	assert.NotEmpty(t, r.Errors())
 }

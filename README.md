@@ -21,7 +21,7 @@ require (
 
 If using govendor run:
 
-`govendor fetch github.com/elastic/go-lookslike/lookslike`
+`govendor fetch github.com/elastic/go-lookslike`
 
 ## Real World Usage Examples
 
@@ -29,5 +29,5 @@ lookslike was created to improve the testing of various structures in [elastic/b
 
 ## Call for More `isdef`s!
 
-We currently [define](https://godoc.org/github.com/elastic/go-lookslike/lookslike/isdef) only the isdefs
+We currently [define](https://godoc.org/github.com/elastic/go-lookslike/isdef) only the isdefs
 we've actually used in the field. If you'd like to add your own, please open a PR (with tests!).
