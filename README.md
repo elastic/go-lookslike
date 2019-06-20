@@ -25,7 +25,7 @@ If using govendor run:
 
 ## Real World Usage Examples
 
-lookslike was created to improve the testing of various structures in [elastic/beats](https://github.com/elastic/beats). Searching the tests for `lookslike` will show real world usage.
+lookslike was created to improve the testing of various structures in [elastic/beats](https://github.com/elastic/beats/search?q=lookslike.MustCompile&unscoped_q=lookslike.MustCompile). Searching the tests for `lookslike.MustCompile` will show real world usage.
 
 ## Call for More `isdef`s!
 
