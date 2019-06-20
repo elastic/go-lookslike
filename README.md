@@ -7,7 +7,7 @@ This library is here to help you with all your data validation needs. It's ideal
 ## Quick Links
 
 * [GoDoc](https://godoc.org/github.com/elastic/go-lookslike) for this library.
-* [Runnable Examples](https://github.com/elastic/go-lookslike/blob/master/lookslike/doc_test.go).
+* [Runnable Examples](https://github.com/elastic/go-lookslike/blob/master/doc_test.go).
 
 ## Install
 
