@@ -114,7 +114,7 @@ func walkFullMap(mVal, rootVal reflect.Value, p llpath.Path, expandPaths bool, w
 	}
 
 	for _, kVal := range mVal.MapKeys() {
-		vVal := reflect.ValueOf(mVal.MapIndex(kVal).Interface())
+		vVal := mVal.MapIndex(kVal)
 		k := kVal.String()
 
 		var newPath llpath.Path

@@ -96,9 +96,6 @@ func Strict(laxValidator validator.Validator) validator.Validator {
 	}
 }
 
-var strType = reflect.TypeOf("")
-var ifaceType = reflect.TypeOf(interface{}("a"))
-
 func compile(in interface{}) (validator.Validator, error) {
 	switch in.(type) {
 	case isdef.IsDef:
@@ -113,12 +110,7 @@ func compile(in interface{}) (validator.Validator, error) {
 			return compileMap(inVal)
 		case reflect.Slice:
 			return compileSlice(inVal)
-
 		default:
-			// By default we just check reflection equality
-			if inVal.Kind() == reflect.Map {
-				return compileMap(inVal)
-			}
 			return compileIsDef(isdef.IsEqual(in))
 		}
 	}
