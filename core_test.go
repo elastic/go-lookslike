@@ -344,6 +344,23 @@ func TestStringSlice(t *testing.T) {
 	assert.Len(t, goodRes.Fields, 2)
 }
 
+
+func TestStringArray(t *testing.T) {
+	a := [2]string{"a", "b"}
+
+	validator := MustCompile([2]string{"a", "b"})
+	goodRes := validator(a)
+
+	assertResults(t, goodRes)
+	assert.Len(t, goodRes.Fields, 2)
+
+	badValidator := MustCompile([2]string{"y"})
+	badRes := badValidator(a)
+
+	assert.False(t, badRes.Valid)
+	assert.Len(t, badRes.Fields, 2)
+}
+
 func TestEmptySlice(t *testing.T) {
 	// In the case of an empty Slice, the validator will compare slice type
 	// In this case we're treating the slice as a value and doing a literal comparison

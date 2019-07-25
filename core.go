@@ -108,7 +108,7 @@ func compile(in interface{}) (validator.Validator, error) {
 		switch inVal.Kind() {
 		case reflect.Map:
 			return compileMap(inVal)
-		case reflect.Slice:
+		case reflect.Slice, reflect.Array:
 			return compileSlice(inVal)
 		default:
 			return compileIsDef(isdef.IsEqual(in))
@@ -156,7 +156,8 @@ func setupWalkObserver() (walkObserver, *CompiledSchema) {
 		if !isCollection || current.value.Len() == 0 {
 			isDef, isIsDef := current.value.Interface().(isdef.IsDef)
 			if !isIsDef {
-				isDef = isdef.IsEqual(current.value.Interface())
+				cv := current.value.Interface()
+				isDef = isdef.IsEqual(cv)
 			}
 
 			compiled = append(compiled, flatValidator{current.path, isDef})
