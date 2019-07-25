@@ -566,3 +566,21 @@ func TestPrimitives(t *testing.T) {
 		})
 	}
 }
+
+// Here we test that we can actually walk the underlying map.
+// Since a strict check requires an extra walk this will only
+// pass if we don't treat the map as an un-traversable interface{}
+// during that phase.
+func TestUnderlyingMap(t *testing.T) {
+	type customMap map[string]interface{}
+	data := customMap{"foo": "bar", "baz": "bot"}
+
+	res := Strict(MustCompile(map[string]interface{}{
+		"foo": "bar",
+	}))(data)
+
+	assert.True(t, res.Fields["foo"][0].Valid)
+	// Assert that the missing field has a validation error
+	assert.False(t, res.Fields["baz"][0].Valid)
+	assert.Len(t, res.Errors(), 1)
+}
