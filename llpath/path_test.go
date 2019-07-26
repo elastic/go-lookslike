@@ -275,9 +275,16 @@ func TestPath_GetFrom(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			gotValue, gotExists := tt.p.GetFrom(tt.arg)
-			if !reflect.DeepEqual(gotValue, tt.wantValue) {
-				t.Errorf("Path.GetFrom() gotValue = %v, want %v", gotValue, tt.wantValue)
+			gotValue, gotExists := tt.p.GetFrom(reflect.ValueOf(tt.arg))
+			if tt.wantExists {
+				if !reflect.DeepEqual(gotValue.Interface(), tt.wantValue) {
+					t.Errorf("Path.GetFrom() gotValue = %v, want %v", gotValue, tt.wantValue)
+				}
+			} else {
+				zero := reflect.Value{}
+				if !(gotValue == zero) {
+					t.Errorf("Path.GetFrom() gotValue = %v, expected zero value", gotValue)
+				}
 			}
 			if gotExists != tt.wantExists {
 				t.Errorf("Path.GetFrom() gotExists = %v, want %v", gotExists, tt.wantExists)

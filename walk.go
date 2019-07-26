@@ -76,10 +76,10 @@ func walkFull(oVal, rootVal reflect.Value, path llpath.Path, expandPaths bool, w
 	lastPathComponent := path.Last()
 	if lastPathComponent == nil {
 		// In the case of a slice we can have an empty path
-		if oVal.Kind() == reflect.Interface {
+		if oVal.Kind() == reflect.Slice || oVal.Kind() == reflect.Array {
 			lastPathComponent = &llpath.PathComponent{}
 		} else {
-			panic("Attempted to traverse an empty Path on a map[string]interface{} in lookslike.walkFull, this should never happen.")
+			panic("Attempted to traverse an empty Path on non array/slice in lookslike.walkFull, this should never happen.")
 		}
 	}
 

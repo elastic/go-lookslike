@@ -19,6 +19,7 @@ package llpath
 
 import (
 	"fmt"
+	"github.com/elastic/go-lookslike/internal/llreflect"
 	"reflect"
 	"regexp"
 	"strconv"
@@ -128,13 +129,17 @@ func (p Path) GetFrom(source reflect.Value) (result reflect.Value, exists bool) 
 	result = source
 	exists = true
 	for _, pc := range p {
+		rs := result.String()
+		fmt.Sprintf("RESULT IS %v\n", rs)
 		switch result.Kind() {
 		case reflect.Map:
-			result = result.MapIndex(reflect.ValueOf(pc.Key))
+			result = llreflect.ChaseValue(result.MapIndex(reflect.ValueOf(pc.Key)))
 			exists = result != reflect.Value{}
 		case reflect.Slice, reflect.Array:
 			if pc.Index < result.Len() {
-				result = result.Index(pc.Index)
+				result = llreflect.ChaseValue(result.Index(pc.Index))
+				s := result.String()
+				fmt.Sprintf(s)
 				exists = result != reflect.Value{}
 			} else {
 				result = reflect.ValueOf(nil)

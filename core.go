@@ -18,6 +18,7 @@
 package lookslike
 
 import (
+	"fmt"
 	"reflect"
 	"sort"
 	"strings"
@@ -145,18 +146,17 @@ func compileIsDef(def isdef.IsDef) (validator validator.Validator, err error) {
 func setupWalkObserver() (walkObserver, *CompiledSchema) {
 	compiled := make(CompiledSchema, 0)
 	return func(current walkObserverInfo) error {
-		// Determine whether we should test this value
-		// We want to test all values except collections that will be traversed by the walk
-		// anyway.
-		// If a collection contains a value, we check those 'leaf' values instead
-		// as the traversal continues, but not in here
 		kind := current.value.Kind()
 		isCollection := kind == reflect.Map || kind == reflect.Slice
+		isEmptyCollection := isCollection && current.value.Len() == 0
 
-		if !isCollection || current.value.Len() == 0 {
+		// We do comparisons on all leaf nodes. If the leaf is an empty collection
+		// we do a comparison to let us test empty structures.
+		if !isCollection || isEmptyCollection {
 			isDef, isIsDef := current.value.Interface().(isdef.IsDef)
 			if !isIsDef {
 				cv := current.value.Interface()
+				fmt.Sprintf("CV %s %v\n", current.path.String(), cv)
 				isDef = isdef.IsEqual(cv)
 			}
 
