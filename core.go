@@ -18,7 +18,6 @@
 package lookslike
 
 import (
-	"fmt"
 	"reflect"
 	"sort"
 	"strings"
@@ -155,9 +154,7 @@ func setupWalkObserver() (walkObserver, *CompiledSchema) {
 		if !isCollection || isEmptyCollection {
 			isDef, isIsDef := current.value.Interface().(isdef.IsDef)
 			if !isIsDef {
-				cv := current.value.Interface()
-				fmt.Sprintf("CV %s %v\n", current.path.String(), cv)
-				isDef = isdef.IsEqual(cv)
+				isDef = isdef.IsEqual(current.value.Interface())
 			}
 
 			compiled = append(compiled, flatValidator{current.path, isDef})

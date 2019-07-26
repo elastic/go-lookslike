@@ -129,8 +129,6 @@ func (p Path) GetFrom(source reflect.Value) (result reflect.Value, exists bool) 
 	result = source
 	exists = true
 	for _, pc := range p {
-		rs := result.String()
-		fmt.Sprintf("RESULT IS %v\n", rs)
 		switch result.Kind() {
 		case reflect.Map:
 			result = llreflect.ChaseValue(result.MapIndex(reflect.ValueOf(pc.Key)))
@@ -138,8 +136,6 @@ func (p Path) GetFrom(source reflect.Value) (result reflect.Value, exists bool) 
 		case reflect.Slice, reflect.Array:
 			if pc.Index < result.Len() {
 				result = llreflect.ChaseValue(result.Index(pc.Index))
-				s := result.String()
-				fmt.Sprintf(s)
 				exists = result != reflect.Value{}
 			} else {
 				result = reflect.ValueOf(nil)
