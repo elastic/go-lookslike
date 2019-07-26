@@ -37,7 +37,7 @@ func (cs CompiledSchema) Check(actual interface{}) *llresult.Results {
 	res := llresult.NewResults()
 	for _, pv := range cs {
 		actualVal, actualKeyExists := pv.path.GetFrom(reflect.ValueOf(actual))
-		var actualInter interface{} = nil
+		var actualInter interface{}
 		zero := reflect.Value{}
 		if actualVal != zero {
 			actualInter = actualVal.Interface()
