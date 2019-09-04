@@ -25,10 +25,10 @@ import (
 )
 
 type walkObserverInfo struct {
-	key   llpath.PathComponent
-	value reflect.Value
-	rootVal  reflect.Value
-	path  llpath.Path
+	key     llpath.PathComponent
+	value   reflect.Value
+	rootVal reflect.Value
+	path    llpath.Path
 }
 
 // walkObserver functions run once per object in the tree.
@@ -36,8 +36,8 @@ type walkObserver func(info walkObserverInfo) error
 
 // walk determine if in is a `map[string]interface{}` or a `Slice` and traverse it if so, otherwise will
 // treat it as a scalar and invoke the walk observer on the input value directly.
-func walk(inVal reflect.Value , expandPaths bool, wo walkObserver) error {
-	switch inVal.Kind()  {
+func walk(inVal reflect.Value, expandPaths bool, wo walkObserver) error {
+	switch inVal.Kind() {
 	case reflect.Map:
 		return walkMap(inVal, expandPaths, wo)
 	case reflect.Slice:
@@ -59,10 +59,10 @@ func walkSlice(sVal reflect.Value, expandPaths bool, wo walkObserver) error {
 
 func walkInterface(s reflect.Value, expandPaths bool, wo walkObserver) error {
 	return wo(walkObserverInfo{
-		value: s,
-		key:   llpath.PathComponent{},
-		rootVal:  reflect.ValueOf(map[string]interface{}{}),
-		path:  llpath.Path{},
+		value:   s,
+		key:     llpath.PathComponent{},
+		rootVal: reflect.ValueOf(map[string]interface{}{}),
+		path:    llpath.Path{},
 	})
 }
 

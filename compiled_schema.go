@@ -43,7 +43,6 @@ func (cs CompiledSchema) Check(actual interface{}) *llresult.Results {
 			actualInter = actualVal.Interface()
 		}
 
-
 		if !pv.isDef.Optional || pv.isDef.Optional && actualKeyExists {
 			var checkRes *llresult.Results
 			checkRes = pv.isDef.Check(pv.path, actualInter, actualKeyExists)

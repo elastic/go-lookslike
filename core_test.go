@@ -344,7 +344,6 @@ func TestStringSlice(t *testing.T) {
 	assert.Len(t, goodRes.Fields, 2)
 }
 
-
 func TestStringArray(t *testing.T) {
 	a := [2]string{"a", "b"}
 
