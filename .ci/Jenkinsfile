@@ -52,7 +52,7 @@ pipeline {
                 withGoEnv(version: "${GO_VERSION}"){
                   dir("${BASE_DIR}"){
                     whenTrue(GO_VERSION == '1.12') {
-                      sh(label: "gofmt for ${GO_VERSION}", script: 'if [[ -z $(gofmt -d .) ]]; then true; else gofmt -d . && false; fi')
+                      sh(label: "gofmt for ${GO_VERSION}", script: 'if [ -z $(gofmt -d .) ]; then true; else gofmt -d . && false; fi')
                     }
                     sh(label: "test for ${GO_VERSION}", script: '.ci/test.sh')
                   }
