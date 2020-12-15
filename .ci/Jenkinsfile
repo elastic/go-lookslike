@@ -46,15 +46,15 @@ pipeline {
         stages {
           stage('Test') {
             steps {
-              withGithubNotify(context: "Test-${GO_VERSION}-${OS_VERSION}") {
+              withGithubNotify(context: "Test-${GO_VERSION}") {
                 deleteDir()
                 unstash 'source'
                 withGoEnv(version: "${GO_VERSION}"){
                   dir("${BASE_DIR}"){
                     whenTrue(GO_VERSION == '1.12') {
-                      sh(label: "gofmt for ${GO_VERSION} in ${PLATFORM}", script: 'if [[ -z $(gofmt -d .) ]]; then true; else gofmt -d . && false; fi')
+                      sh(label: "gofmt for ${GO_VERSION}", script: 'if [[ -z $(gofmt -d .) ]]; then true; else gofmt -d . && false; fi')
                     }
-                    sh(label: "test for ${GO_VERSION} in ${PLATFORM}", script: 'go test -v -race ./...')
+                    sh(label: "test for ${GO_VERSION}", script: '.ci/test.sh')
                   }
                 }
               }
