@@ -1,6 +1,6 @@
 # lookslike
 
-[![Build Status](https://beats-ci.elastic.co/job/Library/job/go-lookslike-mbp/job/master/badge/icon)](https://beats-ci.elastic.co/job/Library/job/go-lookslike-mbp/job/master/)
+[![Build Status](https://beats-ci.elastic.co/job/Library/job/go-lookslike-mbp/job/main/badge/icon)](https://beats-ci.elastic.co/job/Library/job/go-lookslike-mbp/job/main/)
 
 This library is here to help you with all your data validation needs. It's ideally suited to writing tests against JSON-like structures, but can do much much more. We use it in [elastic/beats](https://github.com/elastic/beats) for our own tests. 
 
