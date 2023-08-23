@@ -9,7 +9,7 @@ add_bin_path(){
 }
 
 with_go_junit_report() {
-    go install github.com/jstemmer/go-junit-report/v2@latest
+    go get -v -u github.com/jstemmer/go-junit-report
 }
 
 WORKSPACE=${WORKSPACE:-"$(pwd)"}
