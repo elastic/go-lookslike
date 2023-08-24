@@ -4,6 +4,14 @@ env:
   GO111MODULE: "on"
 
 steps:
+  - label: ":linux: gofmt"
+    command:
+      - ".buildkite/scripts/gofmt.sh"
+    agents:
+      image: golang:1.12
+      cpu: "8"
+      memory: "4G"
+
   - label: ":linux: Test matrix. Go {{matrix.go_version}}"
     key: test-matrix
     matrix:
@@ -12,7 +20,6 @@ steps:
           - "1.12"
           - "1.15.6"
     command:
-      - ".buildkite/scripts/gofmt.sh"
       - ".buildkite/scripts/test.sh"
     env:
       GO_VERSION: "{{matrix.go_version}}"
