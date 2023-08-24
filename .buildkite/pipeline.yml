@@ -12,6 +12,7 @@ steps:
           - "1.12"
           - "1.15.6"
     command:
+      - ".buildkite/scripts/gofmt.sh"
       - ".buildkite/scripts/test.sh"
     env:
       GO_VERSION: "{{matrix.go_version}}"
