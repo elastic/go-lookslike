@@ -10,8 +10,11 @@ echo "--- Run the tests"
 export OUT_FILE="build/test-report.out"
 mkdir -p build
 set +e
-go test -v -race ./... 2>&1 | tee ${OUT_FILE}
+go test -v -race ./... > ${OUT_FILE}
 status=$?
-go-junit-report > "build/junit-${GO_VERSION}.xml" < ${OUT_FILE}
+
+# Buildkite collapse logs under --- symbols
+# need to change --- to anything else or switch off collapsing (note: not available at the moment of this commit)
+awk '{gsub("---", "----"); print }' ${OUT_FILE}
 
 exit ${status}
