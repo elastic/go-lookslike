@@ -4,7 +4,7 @@ env:
   GO111MODULE: "on"
 
 steps:
-  - label: ":linux: Test matrix. Go {{matrix.go_version}}"
+  - label: ":linux: Test on Go {{matrix.go_version}}"
     key: test-matrix
     matrix:
       setup:
@@ -22,6 +22,9 @@ steps:
       memory: "4G"
     artifact_paths:
       - "build/test-report-*"
+    notify:
+      - github_commit_status:
+          context: "Test on Go {{matrix.go_version}}"
 
   - label: ":buildkite: Prepare reports"
     key: prepare-report
