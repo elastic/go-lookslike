@@ -31,7 +31,7 @@ type Results struct {
 	Valid  bool
 }
 
-//ValueResult represents the result of checking a leaf value.
+// ValueResult represents the result of checking a leaf value.
 type ValueResult struct {
 	Valid   bool
 	Message string // Reason this is invalid
@@ -130,7 +130,7 @@ func (r *Results) DetailedErrors() *Results {
 	return errors
 }
 
-//ValueResultError is used to represent an error validating an individual value.
+// ValueResultError is used to represent an error validating an individual value.
 type ValueResultError struct {
 	path        llpath.Path
 	valueResult ValueResult
