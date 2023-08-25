@@ -12,6 +12,7 @@ mkdir -p build
 set +e
 go test -v -race ./... > "${OUT_FILE}"
 status=$?
+set -e
 
 # Buildkite collapse logs under --- symbols
 # need to change --- to anything else or switch off collapsing (note: not available at the moment of this commit)
