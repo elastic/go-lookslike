@@ -1,5 +1,56 @@
 # yaml-language-server: $schema=https://raw.githubusercontent.com/buildkite/pipeline-schema/main/schema.json
 
+env:
+  GO111MODULE: "on"
+
 steps:
-  - label: "Example test"
-    command: echo "Hello!"
+  - label: ":linux: gofmt"
+    command:
+      - ".buildkite/scripts/gofmt.sh"
+    agents:
+      image: golang:1.12
+      cpu: "8"
+      memory: "4G"
+
+  - label: ":linux: Test matrix. Go {{matrix.go_version}}"
+    key: test-matrix
+    matrix:
+      setup:
+        go_version:
+          - "1.12"
+          - "1.15.6"
+    command:
+      - ".buildkite/scripts/test.sh"
+    env:
+      GO_VERSION: "{{matrix.go_version}}"
+    agents:
+      image: golang:{{matrix.go_version}}
+      cpu: "8"
+      memory: "4G"
+    artifact_paths:
+      - "build/test-report-*"
+
+  - label: ":buildkite: Prepare reports"
+    key: prepare-report
+    command:
+      - ".buildkite/scripts/prepare-report.sh"
+    agents:
+      image: golang:1.15.6
+      cpu: "8"
+      memory: "4G"
+    artifact_paths:
+      - "build/test-report-*.xml"
+    depends_on:
+      - step: "test-matrix"
+        allow_failure: true
+
+  - label: ":junit: Junit annotate"
+    plugins:
+      - junit-annotate#v2.4.1:
+          artifacts: "build/test-report-*.xml"
+          fail-build-on-error: true
+    agents:
+      provider: "gcp" #junit plugin requires docker
+    depends_on:
+      - step: "prepare-report"
+        allow_failure: true
