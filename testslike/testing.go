@@ -18,11 +18,11 @@
 package testslike
 
 import (
-	"encoding/json"
 	"testing"
 
 	"github.com/elastic/go-lookslike/llresult"
 	"github.com/elastic/go-lookslike/validator"
+	"github.com/kortschak/utter"
 
 	"github.com/stretchr/testify/assert"
 )
@@ -33,11 +33,10 @@ func Test(t *testing.T, validator validator.Validator, value interface{}) *llres
 	r := validator(value)
 
 	if !r.Valid {
-		marshalled, _ := json.MarshalIndent(value, "", "  ")
 		assert.Fail(
 			t,
 			"lookslike could not validate map",
-			"%d errors validating source: \n%s", len(r.Errors()), marshalled,
+			"%d errors validating source: \n%s", len(r.Errors()), utter.Sdump(value),
 		)
 	}
 
