@@ -22,8 +22,8 @@ import (
 
 	"github.com/elastic/go-lookslike/llresult"
 	"github.com/elastic/go-lookslike/validator"
+	"github.com/kortschak/utter"
 
-	"github.com/davecgh/go-spew/spew"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -36,7 +36,7 @@ func Test(t *testing.T, validator validator.Validator, value interface{}) *llres
 		assert.Fail(
 			t,
 			"lookslike could not validate map",
-			"%d errors validating source: \n%s", len(r.Errors()), spew.Sdump(value),
+			"%d errors validating source: \n%s", len(r.Errors()), utter.Sdump(value),
 		)
 	}
 

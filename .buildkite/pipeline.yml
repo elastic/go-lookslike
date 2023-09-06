@@ -8,7 +8,7 @@ steps:
     command:
       - ".buildkite/scripts/gofmt.sh"
     agents:
-      image: golang:1.12
+      image: golang:1.20
       cpu: "8"
       memory: "4G"
 
@@ -17,8 +17,7 @@ steps:
     matrix:
       setup:
         go_version:
-          - "1.12"
-          - "1.15.6"
+          - "1.20"
     command:
       - ".buildkite/scripts/test.sh"
     env:
@@ -35,7 +34,7 @@ steps:
     command:
       - ".buildkite/scripts/prepare-report.sh"
     agents:
-      image: golang:1.15.6
+      image: golang:1.20
       cpu: "8"
       memory: "4G"
     artifact_paths:
