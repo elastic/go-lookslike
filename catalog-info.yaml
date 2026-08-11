@@ -8,7 +8,7 @@ metadata:
   description: Validate Go Datastructures Based on How Similar They Look
 spec:
   type: library
-  owner: group:ingest-fp
+  owner: group:streams
   system: platform-ingest
   lifecycle: production
 
@@ -25,7 +25,7 @@ metadata:
 
 spec:
   type: buildkite-pipeline
-  owner: group:ingest-fp
+  owner: group:streams
   system: platform-ingest
   implementation:
     apiVersion: buildkite.elastic.dev/v1
@@ -51,7 +51,7 @@ spec:
       env:
         ELASTIC_PR_COMMENTS_ENABLED: 'true'
       teams:
-        ingest-fp:
+        streams:
           access_level: MANAGE_BUILD_AND_READ
         everyone:
           access_level: READ_ONLY
